@@ -1,0 +1,19 @@
+[project]
+dependencies = [
+    "Pillow",
+    "PyQt6",
+    "PyQt6_sip",
+    "numpy",
+    "opencv_python",
+    "pandas",
+    "pdf2image",
+    "pypdf",
+    "pytesseract",
+    "translate",
+    "wikipedia",
+]
+name = "fileopsgui"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
