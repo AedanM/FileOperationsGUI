@@ -1,9 +1,9 @@
 import sys
 
-from Images.ImageWidget import ImageOperationsWidget
-from Media.MediaWidget import MediaOperationsWidget
+from Src.Images.ImageWidget import ImageOperationsWidget
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStyleFactory, QTabWidget
-from Singles.SingleWidget import SingleOperationsWidget
+from Src.Media.MediaWidget import MediaOperationsWidget
+from Src.Singles.SingleWidget import SingleOperationsWidget
 
 
 class MainWindow(QMainWindow):

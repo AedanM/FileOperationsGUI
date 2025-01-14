@@ -2,7 +2,7 @@ import csv
 import re
 from pathlib import Path
 
-import Utilities.FileExplorerTools as fe
+import Src.Utilities.FileExplorerTools as fe
 
 
 def AppendTitles(mediaFolder, title, episodeFolder):

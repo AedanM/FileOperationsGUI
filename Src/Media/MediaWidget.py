@@ -1,11 +1,11 @@
 import subprocess
 import sys
 
-from BaseWidget import BaseWidget
-from Media.AppendTitles import AppendTitles
-from Media.GetEpisodeTitles import LoadEpisodes
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QTextEdit
+from Src.BaseWidget import BaseWidget
+from Src.Media.AppendTitles import AppendTitles
+from Src.Media.GetEpisodeTitles import LoadEpisodes
 
 
 class MediaOperationsWidget(BaseWidget):

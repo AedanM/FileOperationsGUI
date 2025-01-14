@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 import wikipedia as wp
-from Utilities.FileExplorerTools import MakeStringSystemSafe
+from Src.Utilities.FileExplorerTools import MakeStringSystemSafe
 
 MASTER_FOLDER = Path(r".\Episode Listings")
 UA = {"User-Agent": "Aedan McHale (aedan.mchale@gmail.com)"}

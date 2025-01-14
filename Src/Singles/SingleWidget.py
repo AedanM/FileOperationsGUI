@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from BaseWidget import BaseWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QLineEdit, QTextEdit
-from Singles.DecompilePDF import DecompilePDF
-from Singles.SplitIMG import SplitIMG
-from Singles.TranslateIMG import TranslateIMG
-from Singles.TrimEdges import TrimAllEdges
+from Src.BaseWidget import BaseWidget
+from Src.Singles.DecompilePDF import DecompilePDF
+from Src.Singles.SplitIMG import SplitIMG
+from Src.Singles.TranslateIMG import TranslateIMG
+from Src.Singles.TrimEdges import TrimAllEdges
 
 
 class SingleOperationsWidget(BaseWidget):

@@ -1,14 +1,14 @@
 from pathlib import Path
 
-from BaseWidget import BaseWidget
-from Images.CheckSeq import CheckSeq
-from Images.FixNames import FixNames
-from Images.Flatten import Flatten
-from Images.IMGtoPDF import CompileFolderToPDFs
-from Images.MergePDF import MergePDFFolders
-from Images.SortToFolders import SortToFolders
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDoubleSpinBox, QLabel, QLineEdit, QTextEdit
+from Src.BaseWidget import BaseWidget
+from Src.Images.CheckSeq import CheckSeq
+from Src.Images.FixNames import FixNames
+from Src.Images.Flatten import Flatten
+from Src.Images.IMGtoPDF import CompileFolderToPDFs
+from Src.Images.MergePDF import MergePDFFolders
+from Src.Images.SortToFolders import SortToFolders
 
 
 class ImageOperationsWidget(BaseWidget):
