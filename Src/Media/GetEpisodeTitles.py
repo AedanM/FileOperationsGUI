@@ -52,6 +52,7 @@ def LoadEpisodes(topic, _isShow):
             season += 1
     if epList:
         topic = topic.replace("(TV Series)", "")
+        MASTER_FOLDER.mkdir(exist_ok=True)
         with (MASTER_FOLDER / f"{MakeStringSystemSafe(topic)}_Episodes.csv").open(mode="w") as fp:
             fp.write("\n".join(epList))
         return f'{MASTER_FOLDER / f"{MakeStringSystemSafe(topic)}_Episodes.csv"} Written'
