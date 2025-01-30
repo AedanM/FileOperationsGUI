@@ -44,5 +44,5 @@ Features to transform a single image or file
 Written using [Uv Package Manger](https://github.com/astral-sh/uv)
 
 ```powershell
-    uv run .\run.py
+uv run .\run.py
 ```
