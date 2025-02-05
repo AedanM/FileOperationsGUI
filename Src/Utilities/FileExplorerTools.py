@@ -2,21 +2,15 @@ from pathlib import Path
 
 
 def MakeStringSystemSafe(
-    inputPath: str,
-    isFullPath: bool = False,
+    inputPath: str | Path,
     removeSpaces: bool = True,
 ) -> str:
-    stringPath = inputPath
-    objPath: Path = Path(stringPath)
-    keepCharacters = (".", "_", "\\", "/", ":", " ", "-") if isFullPath else (".", "_", " ", "-")
-
-    if str(Path.stem).count(".") > 0:
-        ext = objPath.suffix
-        stringPath = (str(objPath) if not ext else str(objPath).replace(ext, "")).replace(
-            ".", ""
-        ) + ext
-
+    objPath: Path = Path(inputPath)
+    stringPath = objPath.stem
+    bannedChars = '<>:"/\\|?*'
     if removeSpaces:
-        stringPath = stringPath.replace(" ", "_") if removeSpaces else ""
+        bannedChars += " "
+    for bannedChar in bannedChars:
+        stringPath = stringPath.replace(bannedChar, "_")
 
-    return "".join(c for c in stringPath if c.isalnum() or c in keepCharacters).rstrip()
+    return str(objPath.parent / (stringPath + objPath.suffix))
