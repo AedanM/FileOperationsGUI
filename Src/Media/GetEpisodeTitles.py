@@ -44,7 +44,7 @@ def LoadEpisodes(topic, _isShow):
                 }
             )
             df = df[["epNum", "Title"]]
-            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()]
+            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()] # type: ignore
             for _idx, row in df.iterrows():
                 epList.append(
                     f"S{season:02d}E{int(row["epNum"]):02d},{row["Title"].replace('?','')}"
