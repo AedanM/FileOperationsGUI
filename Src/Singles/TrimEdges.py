@@ -3,9 +3,7 @@ from pathlib import Path
 
 from PIL import Image
 
-COLOR: tuple = (0, 0, 0)
-TOLERANCE: float = 0.02
-BUFFER = 5
+CONFIG = {"COLOR": (0, 0, 0), "TOLERANCE": 0.02, "BUFFER": 5}
 
 
 def CheckRow(pixels, rangeVal, index, switch=False):
@@ -14,19 +12,20 @@ def CheckRow(pixels, rangeVal, index, switch=False):
     for idx in range(rangeVal):
         try:
 
-            if tuple(pixels[index, idx] if switch else pixels[idx, index]) != tuple(COLOR):
+            if tuple(pixels[index, idx] if switch else pixels[idx, index]) != tuple(
+                CONFIG["COLOR"]
+            ):
                 miss += 1
             else:
                 match += 1
 
         except Exception as e:
             print(idx, index, e)
-            exit(1)
+            sys.exit(1)
     return miss / (miss + match)
 
 
 def TrimEdge(imgPath):
-    global COLOR
 
     img = Image.open(imgPath).convert("RGB")
     width, height = img.size
@@ -34,17 +33,17 @@ def TrimEdge(imgPath):
         return img
     pixels = img.load()
     top = 0
-    if COLOR is None:
-        COLOR = tuple(pixels[0, 0])
+    if CONFIG["COLOR"] is None:
+        CONFIG["COLOR"] = tuple(pixels[0, 0])
     while top < height:
-        if CheckRow(pixels, width, top) < TOLERANCE:
+        if CheckRow(pixels, width, top) < CONFIG["TOLERANCE"]:
             top += 1
         else:
             break
 
     bottom = height - 1
     while bottom >= top:
-        if CheckRow(pixels, width, bottom) < TOLERANCE:
+        if CheckRow(pixels, width, bottom) < CONFIG["TOLERANCE"]:
             bottom -= 1
         else:
             break
@@ -54,21 +53,21 @@ def TrimEdge(imgPath):
     else:
         left = 0
         while left < width:
-            if CheckRow(pixels, bottom + 1, left, True) < TOLERANCE:
+            if CheckRow(pixels, bottom + 1, left, True) < CONFIG["TOLERANCE"]:
                 left += 1
             else:
                 break
 
         right = width - 1
         while right >= left:
-            if CheckRow(pixels, bottom + 1, right, True) < TOLERANCE:
+            if CheckRow(pixels, bottom + 1, right, True) < CONFIG["TOLERANCE"]:
                 right -= 1
             else:
                 break
-    top = max(top - BUFFER, 0)
-    left = max(left - BUFFER, 0)
-    bottom = min(bottom + BUFFER, height)
-    right = min(right + BUFFER, width)
+    top = max(top - CONFIG["BUFFER"], 0)
+    left = max(left - CONFIG["BUFFER"], 0)
+    bottom = min(bottom + CONFIG["BUFFER"], height)
+    right = min(right + CONFIG["BUFFER"], width)
     if top > bottom or left > right:
         box = (0, 0, 0, 0)
     else:
@@ -78,9 +77,8 @@ def TrimEdge(imgPath):
     return 1
 
 
-def TrimAllEdges(parent, keyColor: tuple = (255, 255, 255)):
-    global COLOR
-    COLOR = keyColor
+def TrimAllEdges(parent, keyColor: tuple | None = (255, 255, 255)):
+    CONFIG["COLOR"] = keyColor
     files = parent.glob("**/*.*") if parent.is_dir() else [parent]
     successCount, fullCount = 0, 0
     for file in files:
