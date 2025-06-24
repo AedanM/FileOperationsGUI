@@ -7,6 +7,7 @@ from PIL import Image
 
 def SplitIMG(imagePath: Path, gridDim: list, makeSubDir: bool = False):
     imgs = list(imagePath.glob("*.*")) if imagePath.is_dir() else [imagePath]
+    print(imgs)
     outPut = ""
     for imgPath in imgs:
         image = Image.open(imgPath)
@@ -54,5 +55,4 @@ def SplitGrid(parentPath: Path, gridSize: list, image: Image.Image, subDir: bool
 if __name__ == "__main__":
     path = Path(sys.argv[1])
     grid = [int(x) for x in sys.argv[2].split("x")]
-    for p in path.glob("*.*"):
-        SplitIMG(path, grid)
+    SplitIMG(path, grid)

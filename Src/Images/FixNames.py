@@ -35,7 +35,9 @@ def FixNames(path: Path, globFilter):
         newName = newName.strip().title()
         newName = CamelToSentence(newName)
         newName = PadFinalNum(newName)
-
+        newName = newName.replace("'S", "'s")
+        if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
+            newName = "_" + newName
         if newName != p.stem:
             try:
                 p.rename(p.parent / str(newName + p.suffix))
