@@ -3,6 +3,7 @@ from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QLineEdit, QTextEdit
 from Src.BaseWidget import BaseWidget
+from Src.Singles import GIFRip
 from Src.Singles.DecompilePDF import DecompilePDF
 from Src.Singles.SplitIMG import SplitIMG
 from Src.Singles.TranslateIMG import TranslateIMG
@@ -29,6 +30,7 @@ class SingleOperationsWidget(BaseWidget):
         self.BuildTranslateFrame(4)
         self.BuildTrimFrame(6)
         self.BuildDecompileFrame(2)
+        self.BuildDecompileGIFFrame(4)
 
     def BuildSplitFrame(self, idx):
         frame, layout = self.BuildBaseFrame(
@@ -83,6 +85,20 @@ class SingleOperationsWidget(BaseWidget):
             yield DecompilePDF(
                 Path(self.ActiveField),
             )
+
+        self.BuildRunButton(frame, layout, RunAction)
+
+        self.Layout.addWidget(frame, 6, idx, 3, 1)
+
+    def BuildDecompileGIFFrame(self, idx):
+        frame, layout = self.BuildBaseFrame(
+            title="Decompile GIF File",
+            caption="Turn a GIF file into a image sequence",
+        )
+        makeDir = self.AddButtonFrame(frame, layout, "SubDir")
+
+        def RunAction():
+            yield GIFRip.GIFToIMGSeq(Path(self.ActiveField), makeDir.isChecked())
 
         self.BuildRunButton(frame, layout, RunAction)
 

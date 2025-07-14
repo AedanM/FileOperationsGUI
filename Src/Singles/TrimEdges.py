@@ -11,10 +11,8 @@ def CheckRow(pixels, rangeVal, index, switch=False):
     match = 0
     for idx in range(rangeVal):
         try:
-
-            if tuple(pixels[index, idx] if switch else pixels[idx, index]) != tuple(
-                CONFIG["COLOR"]
-            ):
+            sample = tuple(pixels[index, idx] if switch else pixels[idx, index])
+            if sample != tuple(CONFIG["COLOR"]) and sample != (0, 0, 0):
                 miss += 1
             else:
                 match += 1

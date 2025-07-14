@@ -40,6 +40,9 @@ def Simplify(inputPath: Path):
                 else:
                     raise FileExistsError(file, dst)
                 try:
+                    if dst.exists():
+                        for f in dirPath.glob("**/*"):
+                            f.unlink()
                     dirPath.rmdir()
                     fileList.append(files[0])
                 except Exception as e:
