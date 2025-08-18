@@ -11,6 +11,7 @@ dependencies = [
     "pytesseract",
     "translate",
     "wikipedia",
+    "cryptography>=3.1",
 ]
 name = "fileopsgui"
 version = "0.1.0"
