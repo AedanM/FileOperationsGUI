@@ -31,7 +31,6 @@ class WorkerThread(QThread):
     def run(self) -> None:
         for result in self.connection():
             self.resultReady.emit(result)
-            time.sleep(10)
 
 
 class BaseWidget(QWidget):

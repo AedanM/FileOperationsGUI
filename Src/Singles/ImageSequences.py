@@ -36,7 +36,7 @@ def DecompileVideo(
         status string
     """
     for videoPath in GetAllVideos(inputPath):
-        dst = inputPath / videoPath.name if makeSubDir else inputPath
+        dst = (inputPath / videoPath.stem) if makeSubDir else videoPath.parent
         if not dst.exists():
             dst.mkdir(parents=True)
 

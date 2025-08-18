@@ -2,6 +2,7 @@
 
 import re
 import sys
+import time
 from collections.abc import Generator
 from pathlib import Path
 
@@ -126,8 +127,8 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
     str
         corrected names
     """
-    passed: int = 0
     renamed: int = 0
+    totalFiles: int = len(list(path.glob(globFilter)))
     for p in path.glob(globFilter):
         newName = FixSpaceSubs(p.stem.strip())
         newName = CamelToSentence(newName)
@@ -135,19 +136,20 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
         newName = newName.strip().title()
         newName = FixContractions(newName)
         newName = RemoveBannedPhrases(newName)
+        newName = re.sub(r"\s+", " ", newName)
         if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
             newName = "_" + newName
 
         if newName != p.stem:
-            dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
+            dst = p.parent / str(newName + p.suffix)
+            if not dst.exists() and dst != p:
+                dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
             p.rename(dst)
             renamed += 1
-        else:
-            passed += 1
-        if (renamed % 10) == 0 and renamed > 0:
-            yield f"{renamed}/{passed + renamed} Renamed"
+        if (renamed % round(totalFiles / 10)) == 0 and renamed > 0:
+            yield f"{renamed}/{totalFiles} Renamed"
 
-    yield f"{renamed}/{passed + renamed} Renamed"
+    yield f"{renamed}/{totalFiles} Renamed"
 
 
 if __name__ == "__main__":
