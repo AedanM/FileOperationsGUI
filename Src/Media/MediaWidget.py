@@ -1,15 +1,21 @@
+"""Media alteration widget."""
+
 import subprocess
 import sys
+from collections.abc import Generator
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QTextEdit
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QTextEdit, QWidget
+
 from Src.BaseWidget import BaseWidget
 from Src.Media.AppendTitles import AppendTitles
 from Src.Media.GetEpisodeTitles import LoadEpisodes
 
 
 class MediaOperationsWidget(BaseWidget):
-    def __init__(self, parent):
+    """Widget for media altering, movies etc."""
+
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.OutputText = QTextEdit(self)
         masterFolderLabel = QLabel(self)
@@ -24,7 +30,7 @@ class MediaOperationsWidget(BaseWidget):
         self.BuildLoadEpisodes(2)
         self.BuildTitleEditFrame(6)
 
-    def BuildAppendFrame(self, idx):
+    def BuildAppendFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Append Titles",
             caption="Use Scraped Titles to Append Filenames",
@@ -40,7 +46,7 @@ class MediaOperationsWidget(BaseWidget):
         layout.addWidget(self.AppendTitle)
         layout.addWidget(episodeFrame)
 
-        def RunAction():
+        def RunAction() -> Generator[str]:
             yield AppendTitles(
                 self.ActiveField,
                 self.AppendTitle.text(),
@@ -48,9 +54,9 @@ class MediaOperationsWidget(BaseWidget):
             )
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 3, idx, 6, 1)  #
+        self.Layout.addWidget(frame, 3, columnIdx, 6, 1)  #
 
-    def BuildLoadEpisodes(self, idx):
+    def BuildLoadEpisodes(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Load Episodes",
             caption="Scrape wikipedia to load episode titles",
@@ -69,30 +75,30 @@ class MediaOperationsWidget(BaseWidget):
         layout.addWidget(self.ContentTitle)
         layout.addWidget(showFrame)
 
-        def RunAction():
+        def RunAction() -> Generator[str]:
             yield LoadEpisodes(topic=self.ContentTitle.text(), _isShow=self.IsShow.isChecked())
 
         self.BuildRunButton(frame, layout, RunAction)
 
-        self.Layout.addWidget(frame, 3, idx, 6, 1)  #
+        self.Layout.addWidget(frame, 3, columnIdx, 6, 1)
 
-    def BuildTitleEditFrame(self, idx):
+    def BuildTitleEditFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Title Edit",
             caption="Reformat Metadata based on File Name",
         )
 
-        def RunAction():
+        def RunAction() -> Generator[str]:
             yield RunTitleEdit(self.ActiveField)
 
         self.BuildRunButton(frame, layout, RunAction)
 
-        self.Layout.addWidget(frame, 3, idx, 3, 1)
+        self.Layout.addWidget(frame, 3, columnIdx, 3, 1)
 
 
-def RunTitleEdit(path) -> str:
-    p = subprocess.Popen(
-        ["powershell.exe", "TitleEdit", path],
+def RunTitleEdit(path: str) -> str:
+    p = subprocess.Popen(  # noqa: S603
+        ["powershell.exe", "TitleEdit", path],  # noqa: S607
         stdout=sys.stdout,
     )
     p.communicate()

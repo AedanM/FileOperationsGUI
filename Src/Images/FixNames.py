@@ -1,52 +1,153 @@
+"""Module to apply naming rules."""
+
 import re
 import sys
+from collections.abc import Generator
 from pathlib import Path
 
-SPACE_SUBS = ["_20", "_", "_%20", " - ", "-", "+"]
+from Src.Utilities.UtilityTools import GenerateUniqueName
 
 
-def PadFinalNum(string):
-    numCount = 0
-    for s in reversed(string):
-        if s.isnumeric():
-            numCount += 1
-        else:
-            break
-    if numCount > 0:
-        return (
-            string[: len(string) - numCount].strip()
-            + " "
-            + f"{int(string[len(string)-numCount:]):03d}"
-        )
-    return string
+def PadFinalNum(name: str) -> str:
+    """Format names to have a final number padded if applicable.
+
+    Parameters
+    ----------
+    name : str
+        input name (format Name1)
+
+    Returns
+    -------
+    str
+        Formatted name (format Name 001)
+    """
+    if match := re.search(r"(\d+)$", name):
+        num = int(match.group(1))
+        prefix = name[: match.start()].strip()
+        return f"{prefix} {num:03d}"
+    return name
 
 
 def CamelToSentence(text: str) -> str:
+    """Convert a CamelCase string to Camel Case.
+
+    Parameters
+    ----------
+    text : str
+        input CamelCase string
+
+    Returns
+    -------
+    str
+        spaced string
+    """
     matches = re.finditer(".+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)", text)
     return " ".join([m.group(0) for m in matches])
 
 
-def FixNames(path: Path, globFilter):
-    passed, renamed = 0, 0
+def FixSpaceSubs(name: str) -> str:
+    """Fix common space replacements used on the internet.
+
+    Parameters
+    ----------
+    name : str
+        unformatted name
+
+    Returns
+    -------
+    str
+        formatted name
+    """
+    SPACE_SUBS = ["_20", "_%20", "_", " - ", "-", "+"]
+    outName: str = name
+    for tag in SPACE_SUBS:
+        outName: str = outName.replace(tag, " ")
+    return outName
+
+
+def FixContractions(name: str) -> str:
+    """Fix issues with str.title() which mean I've becomes I'Ve.
+
+    Parameters
+    ----------
+    name : str
+        errant string
+
+    Returns
+    -------
+    str
+        formatted string
+    """
+    outStr: str = name
+    for match in re.finditer(r"'[A-Z]{1}", outStr):
+        outStr = outStr.replace(match.group(), match.group().lower())
+    return outStr
+
+
+def RemoveBannedPhrases(name: str) -> str:
+    """Remove banned bits from file names.
+
+    Parameters
+    ----------
+    name : str
+        input name
+
+    Returns
+    -------
+    str
+        formatted name
+    """
+    banned: list[str] = [
+        r"\s(P\s)\d",
+        r"\s(Part\s)\d",
+        r"\s(Chapter\s)\d",
+        r"\s(#\d)\d",
+    ]
+    outName = name
+
+    for b in banned:
+        if m := re.search(b, outName):
+            outName = outName.replace(m.group(1), "")
+    return outName
+
+
+def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
+    """Fix names according to preferences.
+
+    Parameters
+    ----------
+    path : Path
+        parent path of files
+    globFilter : str
+        glob pattern to match files
+
+    Returns
+    -------
+    str
+        corrected names
+    """
+    passed: int = 0
+    renamed: int = 0
     for p in path.glob(globFilter):
-        newName = p.stem
-        for tag in SPACE_SUBS:
-            newName = newName.replace(tag, " ")
-        newName = newName.strip().title()
+        newName = FixSpaceSubs(p.stem.strip())
         newName = CamelToSentence(newName)
         newName = PadFinalNum(newName)
-        newName = newName.replace("'S", "'s")
+        newName = newName.strip().title()
+        newName = FixContractions(newName)
+        newName = RemoveBannedPhrases(newName)
         if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
             newName = "_" + newName
+
         if newName != p.stem:
-            try:
-                p.rename(p.parent / str(newName + p.suffix))
-                renamed += 1
-            except PermissionError:
-                pass
+            dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
+            p.rename(dst)
+            renamed += 1
         else:
             passed += 1
-    return f"{renamed}/{passed+renamed} Renamed"
+        if (renamed % 10) == 0 and renamed > 0:
+            yield f"{renamed}/{passed + renamed} Renamed"
+
+    yield f"{renamed}/{passed + renamed} Renamed"
 
 
 if __name__ == "__main__":

@@ -1,4 +1,7 @@
+"""Translate a foreign language image to english in place."""
+
 import sys
+from collections.abc import Generator
 from pathlib import Path
 
 import cv2
@@ -9,10 +12,9 @@ from translate import Translator
 # pylint:disable=E1101
 
 
-def BoxExtract(results):
-
+def BoxExtract(results: dict) -> list[dict]:
     boxList = []
-    for i in range(0, len(results["text"])):
+    for i in range(len(results["text"])):
         if (
             results["word_num"][i] > 0
             and results["conf"][i] > 0
@@ -32,7 +34,7 @@ def BoxExtract(results):
     return boxList
 
 
-def DrawFunc(image, box):
+def DrawFunc(image: cv2.Image, box: dict) -> cv2.Image:
     x, y, w, h = box["shape"]
     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
     imScale = CalcTextScale(box)
@@ -48,7 +50,7 @@ def DrawFunc(image, box):
     return image
 
 
-def CalcTextScale(box):
+def CalcTextScale(box: dict) -> float:
     _x, _y, w, _h = box["shape"]
     textSize = cv2.getTextSize(
         text=box["text"],
@@ -60,7 +62,7 @@ def CalcTextScale(box):
     return imScale
 
 
-def TranslateV2(fromLang: str, path: str):
+def TranslateV2(fromLang: str, path: str) -> Generator[str]:
     translator = Translator(
         provider="mymemory",
         from_lang=fromLang,
@@ -78,10 +80,10 @@ def TranslateV2(fromLang: str, path: str):
         image = DrawFunc(image, b)
     p = Path(path)
     cv2.imwrite(str(p.parent / f"{p.stem}-translated.png"), image)
-    return f"{p.stem}-translated.png Written"
+    yield f"{p.stem}-translated.png Written"
 
 
-def CheckMatchingLines(masterList, box):
+def CheckMatchingLines(masterList: list, box: dict) -> bool:
     match = False
     for idx, mBox in enumerate(masterList):
         mx, my, mw, mh = mBox["shape"]

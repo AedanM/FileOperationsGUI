@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Generator
 from pathlib import Path
 
 from PIL import Image
@@ -23,16 +24,17 @@ def CheckRow(pixels, rangeVal, index, switch=False):
     return miss / (miss + match)
 
 
-def TrimEdge(imgPath):
-
+def TrimEdge(imgPath) -> int:
     img = Image.open(imgPath).convert("RGB")
     width, height = img.size
     if width == 0 or height == 0:
-        return img
+        return 0
     pixels = img.load()
+    if pixels is None:
+        return 0
     top = 0
     if CONFIG["COLOR"] is None:
-        CONFIG["COLOR"] = tuple(pixels[0, 0])
+        CONFIG["COLOR"] = tuple(pixels[0, 0])  # type:ignore
     while top < height:
         if CheckRow(pixels, width, top) < CONFIG["TOLERANCE"]:
             top += 1
@@ -75,7 +77,7 @@ def TrimEdge(imgPath):
     return 1
 
 
-def TrimAllEdges(parent, keyColor: tuple | None = (255, 255, 255)):
+def TrimAllEdges(parent, keyColor: tuple | None = (255, 255, 255)) -> Generator[str]:
     CONFIG["COLOR"] = keyColor
     files = parent.glob("**/*.*") if parent.is_dir() else [parent]
     successCount, fullCount = 0, 0
@@ -86,7 +88,7 @@ def TrimAllEdges(parent, keyColor: tuple | None = (255, 255, 255)):
                 successCount += TrimEdge(file)
             except Exception as e:
                 print(f"{file} Failed with {e}")
-    return f"{successCount}/{fullCount} Trimmed in Place"
+    yield f"{successCount}/{fullCount} Trimmed in Place"
 
 
 if __name__ == "__main__":
