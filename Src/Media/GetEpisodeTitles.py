@@ -1,16 +1,19 @@
+"""Get episodes from wikipedia."""
+
 from io import StringIO
 from pathlib import Path
 
 import pandas as pd
 import requests
 import wikipedia as wp
-from Src.Utilities.FileExplorerTools import MakeStringSystemSafe
+
+from Src.Utilities.UtilityTools import MakeStringSystemSafe
 
 MASTER_FOLDER = Path(r".\Episode Listings")
 UA = {"User-Agent": "Aedan McHale (aedan.mchale@gmail.com)"}
 
 
-def GetHTML(topic) -> str:
+def GetHTML(topic: str) -> str:
     try:
         html = wp.page(topic).html()
     except wp.exceptions.PageError:
@@ -23,7 +26,7 @@ def GetHTML(topic) -> str:
     return html
 
 
-def LoadEpisodes(topic, _isShow):
+def LoadEpisodes(topic: str, _isShow: bool) -> str:
     html = GetHTML(topic)
 
     season = 1
@@ -31,8 +34,8 @@ def LoadEpisodes(topic, _isShow):
     for df in pd.read_html(StringIO(html)):
         keyList = "".join([str(x) for x in list(df.keys())])
         if "Title" in keyList and "No." in keyList:
-            badTitle = [str(x) for x in df.keys() if "Title" in x][0]
-            badSeason = [str(x) for x in df.keys() if "No." in x]
+            badTitle = [str(x) for x in df if "Title" in str(x)][0]
+            badSeason = [str(x) for x in df if "No." in str(x)]
             if len(badSeason) > 1:
                 badSeason = [x for x in badSeason if "overall" not in x][0]
             else:
@@ -41,13 +44,13 @@ def LoadEpisodes(topic, _isShow):
                 columns={
                     badSeason: "epNum",
                     badTitle: "Title",
-                }
+                },
             )
             df = df[["epNum", "Title"]]
-            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()] # type: ignore
+            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()]
             for _idx, row in df.iterrows():
                 epList.append(
-                    f"S{season:02d}E{int(row["epNum"]):02d},{row["Title"].replace('?','')}"
+                    f"S{season:02d}E{int(row['epNum']):02d},{row['Title'].replace('?', '')}",
                 )
             season += 1
     if epList:
@@ -55,5 +58,5 @@ def LoadEpisodes(topic, _isShow):
         MASTER_FOLDER.mkdir(exist_ok=True)
         with (MASTER_FOLDER / f"{MakeStringSystemSafe(topic)}_Episodes.csv").open(mode="w") as fp:
             fp.write("\n".join(epList))
-        return f'{MASTER_FOLDER / f"{MakeStringSystemSafe(topic)}_Episodes.csv"} Written'
+        return f"{MASTER_FOLDER / f'{MakeStringSystemSafe(topic)}_Episodes.csv'} Written"
     return "ERROR None Found"

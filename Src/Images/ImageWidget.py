@@ -1,19 +1,22 @@
+"""Widget for image manipulation, essentially the homepage."""
+
+from collections.abc import Generator
 from pathlib import Path
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QDoubleSpinBox, QLabel, QLineEdit, QTextEdit
+from PyQt6.QtWidgets import QDoubleSpinBox, QLabel, QLineEdit, QTextEdit, QWidget
+
 from Src.BaseWidget import BaseWidget
 from Src.Images.CheckSeq import CheckSeq
 from Src.Images.FixNames import FixNames
-from Src.Images.Flatten import Flatten
-from Src.Images.IMGtoPDF import CompileFolderToPDFs
-from Src.Images.MergePDF import MergePDFFolders
-from Src.Images.SortToFolders import SortToFolders
+from Src.Images.FolderTools import Flatten, SortToFolders
+from Src.Images.PDFTools import CompileImages, MergePDF
 
 
 class ImageOperationsWidget(BaseWidget):
+    """Image operations page of the widget."""
 
-    def __init__(self, parent):
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
 
         self.OutputText = QTextEdit(self)
@@ -38,31 +41,31 @@ class ImageOperationsWidget(BaseWidget):
         self.BuildPDFFrame(6)
         self.BuildIMG2PDFFrame(6)
 
-    def BuildCheckSeqFrame(self, idx):
+    def BuildCheckSeqFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Check Seq",
             caption="Check that a sequence of files is complete",
         )
 
-        def RunAction():
-            yield CheckSeq(self.ActiveField)
+        def RunAction() -> Generator[str]:
+            return CheckSeq(Path(self.ActiveField))
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 6, idx, 3, 1)
+        self.Layout.addWidget(frame, 6, columnIdx, 3, 1)
 
-    def BuildSortFolderFrame(self, idx):
+    def BuildSortFolderFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Sort To Folders",
             caption="Sort Img sequences to Folders",
         )
 
-        def RunAction():
-            yield SortToFolders(Path(self.ActiveField))
+        def RunAction() -> Generator[str]:
+            return SortToFolders(Path(self.ActiveField))
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 3, idx, 3, 1)
+        self.Layout.addWidget(frame, 3, columnIdx, 3, 1)
 
-    def BuildFlattenFrame(self, idx):
+    def BuildFlattenFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Flatten",
             caption="Flatten a file directory",
@@ -75,25 +78,18 @@ class ImageOperationsWidget(BaseWidget):
         globPattern.setPlaceholderText("Glob Pattern")
         layout.addWidget(globPattern)
 
-        def RunAction():
-            if globPattern.text() != "":
-                yield Flatten(
-                    Path(self.ActiveField),
-                    rename.isChecked(),
-                    delete.isChecked(),
-                    globPattern=globPattern.text(),
-                )
-            else:
-                yield Flatten(
-                    Path(self.ActiveField),
-                    rename.isChecked(),
-                    delete.isChecked(),
-                )
+        def RunAction() -> Generator[str]:
+            return Flatten(
+                Path(self.ActiveField),
+                rename.isChecked(),
+                delete.isChecked(),
+                globPattern=globPattern.text() if globPattern.text() else "**/*.*",
+            )
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 6, idx, 3, 1)
+        self.Layout.addWidget(frame, 6, columnIdx, 3, 1)
 
-    def BuildPDFFrame(self, idx):
+    def BuildPDFFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Compile To PDF",
             caption="Convert Img Sequence to PDF</p><p>At % resolution",
@@ -104,29 +100,29 @@ class ImageOperationsWidget(BaseWidget):
         resolutionBox.setValue(100.0)
         layout.addWidget(resolutionBox)
 
-        def RunAction():
-            yield CompileFolderToPDFs(
+        def RunAction() -> Generator[str]:
+            return CompileImages(
                 Path(self.ActiveField),
                 resolutionBox.value(),
             )
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 3, idx, 3, 1)
+        self.Layout.addWidget(frame, 3, columnIdx, 3, 1)
 
-    def BuildIMG2PDFFrame(self, idx):
+    def BuildIMG2PDFFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Merge PDFs",
             caption="Merge PDFs in folders",
         )
 
-        def RunAction():
-            yield MergePDFFolders(Path(self.ActiveField))
+        def RunAction() -> Generator[str]:
+            return MergePDF(Path(self.ActiveField))
 
         self.BuildRunButton(frame, layout, RunAction)
 
-        self.Layout.addWidget(frame, 6, idx, 3, 1)
+        self.Layout.addWidget(frame, 6, columnIdx, 3, 1)
 
-    def BuildFixNamesFrame(self, idx):
+    def BuildFixNamesFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Fix Names",
             caption="Apply Naming Rules",
@@ -136,11 +132,11 @@ class ImageOperationsWidget(BaseWidget):
         globFilter.setPlaceholderText("Glob Pattern")
         layout.addWidget(globFilter)
 
-        def RunAction():
-            yield FixNames(
+        def RunAction() -> Generator[str]:
+            return FixNames(
                 Path(self.ActiveField),
                 globFilter.text() if globFilter.text() != "" else "*.*",
             )
 
         self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, 3, idx, 3, 1)
+        self.Layout.addWidget(frame, 3, columnIdx, 3, 1)

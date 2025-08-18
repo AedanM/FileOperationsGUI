@@ -1,11 +1,12 @@
+"""Append titles to the end of media."""
 import csv
 import re
 from pathlib import Path
 
-import Src.Utilities.FileExplorerTools as fe
+import Src.Utilities.UtilityTools as ut
 
 
-def AppendTitles(mediaFolder, title, episodeFolder):
+def AppendTitles(mediaFolder: str, title: str, episodeFolder: str) -> str:
     episodeTitles = LoadTitles(title, episodeFolder)
     if episodeTitles:
         renameCount = 0
@@ -20,7 +21,8 @@ def AppendTitles(mediaFolder, title, episodeFolder):
                     epAndSeason = file.stem[start:end]
                     if episodeTitles[epAndSeason] not in file.stem:
                         newName = file.stem.replace(
-                            epAndSeason, f"{epAndSeason} {episodeTitles[epAndSeason]}"
+                            epAndSeason,
+                            f"{epAndSeason} {episodeTitles[epAndSeason]}",
                         )
                         file.rename(Path(file.parent) / (newName + file.suffix))
                         renameCount += 1
@@ -33,14 +35,14 @@ def AppendTitles(mediaFolder, title, episodeFolder):
     return "Episode Titles Not Found"
 
 
-def LoadTitles(title, episodeFolder) -> dict[str, str]:
+def LoadTitles(title: str, episodeFolder: str) -> dict[str, str]:
     try:
-        episodeTitlesCSV = f"{fe.MakeStringSystemSafe(inputPath=title)}_Episodes.csv"
+        episodeTitlesCSV = f"{ut.MakeStringSystemSafe(inputPath=title)}_Episodes.csv"
         episodeCSVPath = Path(episodeFolder) / episodeTitlesCSV
         with episodeCSVPath.open(mode="r") as fp:
             episodeTitles = dict(csv.reader(fp))
     except FileNotFoundError:
-        episodeTitlesCSV = f"{fe.MakeStringSystemSafe(inputPath=title)}_TV_Series_Episodes.csv"
+        episodeTitlesCSV = f"{ut.MakeStringSystemSafe(inputPath=title)}_TV_Series_Episodes.csv"
         episodeCSVPath = Path(episodeFolder) / episodeTitlesCSV
         with episodeCSVPath.open(mode="r") as fp:
             episodeTitles = dict(csv.reader(fp))
