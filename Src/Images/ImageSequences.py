@@ -1,5 +1,6 @@
 """Decomposing files into composite parts."""
 
+import itertools
 from collections.abc import Generator
 from math import floor
 from pathlib import Path
@@ -8,7 +9,7 @@ from cv2 import CAP_PROP_FPS, CAP_PROP_FRAME_COUNT, CAP_PROP_POS_FRAMES, VideoCa
 from pdf2image import convert_from_path
 from PIL import Image
 
-from Src.Utilities.UtilityTools import GetAllVideos
+from Src.Utilities.UtilityTools import DigitizeStr, GetAllVideos
 
 
 def DecompileVideo(
@@ -35,7 +36,8 @@ def DecompileVideo(
     Generator[str]
         status string
     """
-    for videoPath in GetAllVideos(inputPath):
+    vidList = GetAllVideos(inputPath)
+    for videoPath in vidList:
         dst = (inputPath / videoPath.stem) if makeSubDir else videoPath.parent
         if not dst.exists():
             dst.mkdir(parents=True)
@@ -64,6 +66,8 @@ def DecompileVideo(
 
         video.release()
         yield f"Extracted {endFrame - startFrame} frames to {dst}"
+    if not vidList:
+        yield "No video files found"
 
 
 def DecompilePDF(inputPath: Path, makeSubdir: bool) -> Generator[str]:
@@ -100,6 +104,8 @@ def DecompilePDF(inputPath: Path, makeSubdir: bool) -> Generator[str]:
         )
 
         yield f"{dst.parent.name}\\{dst.name}"
+    if not pdfList:
+        yield "No .pdf files found"
 
 
 def DecompileGIF(inputPath: Path, renderToSubDir: bool = False) -> Generator[str]:
@@ -127,6 +133,8 @@ def DecompileGIF(inputPath: Path, renderToSubDir: bool = False) -> Generator[str
             imageObject.seek(frame)
             imageObject.save(parentDir / f"{path.stem} {frame:03d}.png")
         yield f"Rendered {imageObject.n_frames} frames to {parentDir}"  # type: ignore[reportAttributeAccessIssue]
+    if not gifList:
+        yield "No .gif files found"
 
 
 def SplitIMG(imagePath: Path, gridDim: list[int], makeSubDir: bool = False) -> Generator[str]:
@@ -204,3 +212,38 @@ def SplitGrid(imagePath: Path, gridSize: list, createSubDir: bool) -> str:
             cropped.save(dstPath / f"{imagePath.stem} {successCount:02d}.png")
 
     return f"{successCount}/{x * y} Saved In {imagePath.name}"
+
+
+def Ranges(i: list[int]) -> Generator[tuple[int, int]]:
+    for _a, b in itertools.groupby(enumerate(i), lambda pair: pair[1] - pair[0]):
+        b = list(b)
+        yield b[0][1], b[-1][1]
+
+
+def CheckSequence(filePath: Path) -> list:
+    fileNums: set[int] = set()
+    for file in [x for x in filePath.glob("**/*") if isinstance(x, Path)]:
+        fileNums.add(DigitizeStr(inString=file.stem))
+    numList: list[int] = sorted(fileNums)
+
+    prevVal: int = numList[0]
+    missingVals: list[int] = []
+    for num in numList[1:]:
+        if prevVal != num - 1:
+            missingVals += range(prevVal + 1, num)
+        prevVal = num
+    return list(Ranges(missingVals))
+
+
+def CheckSeq(path: Path) -> Generator[str]:
+    missing = CheckSequence(path)
+    if missing:
+        missingList = [f"{x[0]} to {x[1]}" if x[0] != x[1] else str(x[0]) for x in missing]
+        outStr = f"Missing {', '.join(missingList)}"
+    else:
+        fileNums: set[int] = set()
+        for file in [x for x in path.glob("**/*") if isinstance(x, Path)]:
+            fileNums.add(DigitizeStr(inString=file.stem))
+        numList: list[int] = sorted(fileNums)
+        outStr = f"Complete Sequence from {numList[0]}-{numList[-1]}"
+    yield outStr

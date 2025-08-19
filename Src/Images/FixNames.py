@@ -2,7 +2,6 @@
 
 import re
 import sys
-import time
 from collections.abc import Generator
 from pathlib import Path
 
@@ -146,7 +145,8 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
                 dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
             p.rename(dst)
             renamed += 1
-        if (renamed % round(totalFiles / 10)) == 0 and renamed > 0:
+        updateRate: int = max(round(totalFiles / 10), 1)
+        if (renamed % updateRate) == 0 and renamed > 0:
             yield f"{renamed}/{totalFiles} Renamed"
 
     yield f"{renamed}/{totalFiles} Renamed"

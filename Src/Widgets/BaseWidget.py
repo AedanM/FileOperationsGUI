@@ -1,6 +1,5 @@
 """Base widget which gui in built on."""
 
-import time
 from collections.abc import Callable
 from typing import Any
 
@@ -29,14 +28,11 @@ class WorkerThread(QThread):
         self.connection = connection
 
     def run(self) -> None:
-        while True:
-            try:
-                result = next(self.connection())
-            except StopIteration:
-                break
-            except Exception as e:
-                result = f"Error Occurred {e}"
-            self.resultReady.emit(result)
+        try:
+            for result in self.connection():
+                self.resultReady.emit(result)
+        except Exception as e:
+            self.resultReady.emit(f"Error Occurred {e}")
 
 
 class BaseWidget(QWidget):
@@ -100,7 +96,7 @@ class BaseWidget(QWidget):
 
         titleLabel = QLabel(funcFrame)
         titleLabel.setStyleSheet("border:0px; border-bottom:5px solid white")
-        titleLabel.setFixedHeight(100)
+        titleLabel.setFixedHeight(75)
         titleLabel.setText(f"<h1>{title}</h1>")
 
         descLabel = QLabel(funcFrame)

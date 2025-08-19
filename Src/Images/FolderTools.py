@@ -5,10 +5,10 @@ import shutil
 from collections.abc import Generator
 from pathlib import Path
 
-from Src.Utilities.UtilityTools import DeleteFolder
+from Src.Utilities.UtilityTools import ComputeHash, DeleteFolder, GenerateUniqueName
 
 
-def SortToFolders(p: Path, minCount: int = 1) -> Generator[str]:
+def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[str]:
     """Sort files by file name into folders (file 1, file 2, file 3 -> /file).
 
     Parameters
@@ -23,6 +23,9 @@ def SortToFolders(p: Path, minCount: int = 1) -> Generator[str]:
     Generator[str]
         _description_
     """
+    if simplifyFirst:
+        yield from Simplify(p)
+
     files: list[Path] = list(p.glob("*.*"))
     seqs: set[str] = set()
     for file in files:
@@ -35,7 +38,7 @@ def SortToFolders(p: Path, minCount: int = 1) -> Generator[str]:
             folder.mkdir(parents=True, exist_ok=True)
             for file in sequenceFiles:
                 file.replace(folder / file.name)
-            yield f"{seq} Folder Made with {len(sequenceFiles)} Files"
+            yield f"{seq} -> {len(sequenceFiles)} Files"
 
 
 def Flatten(
@@ -75,3 +78,40 @@ def Flatten(
     yield f"{len(list(p.glob(globPattern)))} Files moved to {p.name}" + (
         f"\n{len(list(p.glob('**/*/')))} Folders Removed" if delete else ""
     )
+
+
+def AllEqualFiles(folder: Path) -> bool:
+    """Determine if all files in a folder are the same."""
+    if not folder:
+        return False
+    files = [p for p in folder.iterdir() if p.is_file()]
+
+    if len(files) <= 1:
+        return True
+
+    firstHash = ComputeHash(files[0])
+    return all(ComputeHash(other) == firstHash for other in files[1:])
+
+
+def Simplify(inputPath: Path) -> Generator[str]:
+    """Reduce folder structure in directory."""
+    folderList: list[Path] = [x for x in inputPath.glob("*") if x.is_dir() and x.stem[0] != "_"]
+    for dirPath in folderList:
+        files: list[Path] = list(dirPath.glob("*.*"))
+        if AllEqualFiles(dirPath):
+            masterFile: Path = files[0]
+            dst: Path = dirPath.parent / f"{dirPath.name}{masterFile.suffix}"
+            if dst.exists() and ComputeHash(masterFile) == ComputeHash(dst):
+                pass
+            elif not dst.exists():
+                masterFile.rename(dst)
+            else:
+                dst: Path = GenerateUniqueName(
+                    dirPath.parent / f"{dirPath.name}{masterFile.suffix}",
+                )
+                masterFile.rename(dst)
+                raise FileExistsError(masterFile, dst)
+            if DeleteFolder(dirPath):
+                yield str(files[0])
+            else:
+                yield (f"Could not delete -> {dirPath}")

@@ -7,12 +7,12 @@ from collections.abc import Generator
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QTextEdit, QWidget
 
-from Src.BaseWidget import BaseWidget
 from Src.Media.AppendTitles import AppendTitles
 from Src.Media.GetEpisodeTitles import LoadEpisodes
+from Src.Widgets.BaseWidget import BaseWidget
 
 
-class MediaOperationsWidget(BaseWidget):
+class MediaWidget(BaseWidget):
     """Widget for media altering, movies etc."""
 
     def __init__(self, parent: QWidget) -> None:

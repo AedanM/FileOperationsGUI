@@ -1,11 +1,14 @@
 """Utility tools for file gui."""
 
 import hashlib
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from functools import wraps
 from pathlib import Path
 from time import time
 from typing import Any
+
+VIDEO_EXTS: list[str] = ["mkv", "mp4", "avi", "webm"]
+IMG_EXTS: list[str] = ["png", "bmp", "webp", "ico", "jpeg", "jpg", "tiff", "heic"]
 
 
 def DeleteFolder(path: Path) -> bool:
@@ -53,6 +56,10 @@ def TimeUtility(repetitions: int = 10000, returnResults: bool = False) -> Callab
     return TimeMethod
 
 
+def GenerateMessage(message: str) -> Generator[str]:
+    yield message
+
+
 def CheckAgainstList(item: Any, tags: list[str]) -> bool:
     return any(tag in str(item) for tag in tags)
 
@@ -89,7 +96,7 @@ def GetAllVideos(inputPath: Path) -> list[Path]:
     if inputPath.is_file():
         outList = [inputPath]
     else:
-        for ext in ["mkv", "mp4", "avi", "webm"]:
+        for ext in VIDEO_EXTS:
             outList += list(inputPath.glob(f"*.{ext}"))
     return outList
 
@@ -113,3 +120,7 @@ def GenerateUniqueName(filePath: Path) -> Path:
         outPath = outPath.parent / f"{outPath.stem} {count:03d}{outPath.suffix}"
         count += 1
     return outPath
+
+
+def DigitizeStr(inString: str) -> int:
+    return int("".join([char for char in inString if char.isnumeric()]))
