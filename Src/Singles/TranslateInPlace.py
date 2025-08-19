@@ -34,7 +34,7 @@ def BoxExtract(results: dict) -> list[dict]:
     return boxList
 
 
-def DrawFunc(image: cv2.Image, box: dict) -> cv2.Image:
+def DrawFunc(image, box: dict):
     x, y, w, h = box["shape"]
     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
     imScale = CalcTextScale(box)
