@@ -29,9 +29,14 @@ class WorkerThread(QThread):
         self.connection = connection
 
     def run(self) -> None:
-        for result in self.connection():
+        while True:
+            try:
+                result = next(self.connection())
+            except StopIteration:
+                break
+            except Exception as e:
+                result = f"Error Occurred {e}"
             self.resultReady.emit(result)
-            time.sleep(10)
 
 
 class BaseWidget(QWidget):
