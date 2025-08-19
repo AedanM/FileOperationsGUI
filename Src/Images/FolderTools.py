@@ -67,7 +67,7 @@ def Flatten(
     """
     for folder in p.glob(globPattern):
         if folder.parent != p:
-            dst: Path = p / f"{folder.parent.stem if rename else ''} {folder.name}"
+            dst: Path = p / f"{folder.parent.stem + ' ' if rename else ''}{folder.name}"
             if delete:
                 folder.rename(dst)
             else:
