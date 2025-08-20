@@ -3,6 +3,7 @@
 import sys
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 
 import cv2
 import pytesseract
@@ -34,7 +35,7 @@ def BoxExtract(results: dict) -> list[dict]:
     return boxList
 
 
-def DrawFunc(image, box: dict):
+def DrawFunc(image: Any, box: dict) -> Any:
     x, y, w, h = box["shape"]
     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
     imScale = CalcTextScale(box)

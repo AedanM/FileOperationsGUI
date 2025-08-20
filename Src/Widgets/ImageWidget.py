@@ -21,6 +21,7 @@ class ImageWidget(BaseWidget):
         super().__init__(parent)
 
         self.OutputText = QTextEdit(self)
+        self.OutputText.setMinimumHeight(200)
 
         masterFolderLabel = QLabel(self)
         masterFolderLabel.setText("<h1>Master Folder</h1>")
@@ -34,7 +35,7 @@ class ImageWidget(BaseWidget):
         self.Layout.addWidget(inputFrame, 1, 0, 1, 7)
 
         self.BuildFixNamesFrame(2, 3)
-        self.BuildCheckSeqFrame(2, 6)
+        self.BuildTrimFrame(2, 6)
 
         self.BuildSortFolderFrame(4, 3)
         self.BuildFlattenFrame(4, 6)
@@ -42,6 +43,7 @@ class ImageWidget(BaseWidget):
         self.BuildCompilePDFFrame(6, 3)
         self.BuildDecompileFrame(6, 6)
 
+    # region Constructors
     def BuildCheckSeqFrame(self, columnIdx: int, rowIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Check Sequence",
@@ -196,3 +198,5 @@ class ImageWidget(BaseWidget):
         self.BuildRunButton(frame, layout, RunAction)
 
         self.Layout.addWidget(frame, rowIdx, columnIdx, 3, 1)
+
+    # endregion

@@ -1,14 +1,12 @@
 """Media alteration widget."""
 
-import subprocess
-import sys
 from collections.abc import Generator
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QTextEdit, QWidget
 
-from Src.Media.AppendTitles import AppendTitles
 from Src.Media.GetEpisodeTitles import LoadEpisodes
+from Src.Media.Titles import AppendTitles, RunTitleEdit
 from Src.Widgets.BaseWidget import BaseWidget
 
 
@@ -29,6 +27,8 @@ class MediaWidget(BaseWidget):
         self.BuildAppendFrame(0)
         self.BuildLoadEpisodes(2)
         self.BuildTitleEditFrame(6)
+
+    # region Constructors
 
     def BuildAppendFrame(self, columnIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
@@ -95,11 +95,4 @@ class MediaWidget(BaseWidget):
 
         self.Layout.addWidget(frame, 3, columnIdx, 3, 1)
 
-
-def RunTitleEdit(path: str) -> str:
-    p = subprocess.Popen(  # noqa: S603
-        ["powershell.exe", "TitleEdit", path],  # noqa: S607
-        stdout=sys.stdout,
-    )
-    p.communicate()
-    return "Processed"
+    # endregion

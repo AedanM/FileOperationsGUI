@@ -1,6 +1,9 @@
 """Append titles to the end of media."""
+
 import csv
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import Src.Utilities.UtilityTools as ut
@@ -54,3 +57,12 @@ if __name__ == "__main__":
     TITLE = r"Adventures_of_Superman"
     EP_FOLDER = r".\Temp\Episodes"
     AppendTitles(mediaFolder=FOLDER, title=TITLE, episodeFolder=EP_FOLDER)
+
+
+def RunTitleEdit(path: str) -> str:
+    p = subprocess.Popen(  # noqa: S603
+        ["powershell.exe", "TitleEdit", path],  # noqa: S607
+        stdout=sys.stdout,
+    )
+    p.communicate()
+    return "Processed"

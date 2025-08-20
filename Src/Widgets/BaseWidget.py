@@ -46,12 +46,10 @@ class BaseWidget(QWidget):
         layout = QGridLayout(self)
         self.setLayout(layout)
 
+    # region Properties
     @property
     def ActiveField(self) -> str:
         return self.MainFolderInput.text().replace('"', "")
-
-    def Setup(self, **_kwargs: Any) -> None:
-        pass
 
     @property
     def CleanName(self) -> str:
@@ -63,6 +61,23 @@ class BaseWidget(QWidget):
         if not isinstance(layout, QGridLayout):
             layout = QGridLayout(self)
         return layout
+
+    # endregion
+
+    def Setup(self, **_kwargs: Any) -> None:
+        pass
+
+    def SelectFolder(self, lineEdit: QLineEdit) -> str:
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
+        lineEdit.setText(folder)
+        return folder
+
+    def SelectFile(self, lineEdit: QLineEdit) -> str:
+        folder = QFileDialog.getOpenFileName(self, "Select File")
+        lineEdit.setText(folder[0])
+        return folder
+
+    # region Constructors
 
     def BuildInputFrame(self, lineEdit: QLineEdit, selectFolder: bool = True) -> QFrame:
         inputFrame = QFrame(self)
@@ -79,16 +94,6 @@ class BaseWidget(QWidget):
         inputFrameLayout.addWidget(lineEdit)
         inputFrameLayout.addWidget(browseButton)
         return inputFrame
-
-    def SelectFolder(self, lineEdit: QLineEdit) -> str:
-        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
-        lineEdit.setText(folder)
-        return folder
-
-    def SelectFile(self, lineEdit: QLineEdit) -> str:
-        folder = QFileDialog.getOpenFileName(self, "Select File")
-        lineEdit.setText(folder[0])
-        return folder
 
     def BuildBaseFrame(self, title: str, caption: str) -> tuple[QFrame, QVBoxLayout]:
         funcFrame = QFrame(self)
@@ -175,3 +180,5 @@ class BaseWidget(QWidget):
         btnLayout.addWidget(btn)
         masterLayout.addWidget(btnFrame)
         return btn
+
+    # endregion

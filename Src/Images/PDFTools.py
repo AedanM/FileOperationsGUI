@@ -3,6 +3,7 @@
 Install poppler -> conda install -c conda-forge poppler.
 """
 
+import contextlib
 from collections.abc import Generator
 from pathlib import Path
 from statistics import mode
@@ -31,39 +32,38 @@ def MergePDF(folderPath: Path) -> Generator[str]:
         yield folderPath.name + ".pdf Written"
 
 
-def GetPageHeight(parentPath: Path) -> int:
+def GetPageHeight(imgs: list[Image.Image]) -> int:
     heights = []
-    for img in parentPath.glob("*.*"):
-        try:
-            im = Image.open(img)
-            heights.append(im.size[1])
-        except ValueError:
-            pass
+    for img in imgs:
+        with contextlib.suppress(ValueError):
+            heights.append(img.size[1])
     return int(round(min(mode(heights), 2160), 0))
 
 
 def CompileImages(dirPath: Path, quality: float) -> Generator[str]:
     files: list[Path] = list(dirPath.glob("*.*"))
     if len(files) > 1:
+        output: list[Image.Image] = []
         imgs: list[Image.Image] = []
-        height: int = -1
+
         try:
-            height: int = round((GetPageHeight(parentPath=dirPath) * quality) / 100)
+            imgs: list[Image.Image] = [Image.open(file).copy() for file in files]
         except UnidentifiedImageError as e:
             yield f"Unable to compile {dirPath} -> {e} {type(e)}"
-        if height > 1:
-            for img in sorted(files):
-                im: Image.Image = Image.open(img)
+
+        if imgs:
+            height = round((GetPageHeight(imgs=imgs) * quality) / 100)
+            for im in imgs:
                 newWidth: int = im.size[0]
                 if im.size[1] != height:
                     newWidth: int = round(im.size[0] * (height / im.size[1]))
                     im = im.resize((newWidth, height))
-                imgs.append(im)
+                output.append(im)
 
-            if imgs:
-                pdfPath = GenerateUniqueName(dirPath.parent / (dirPath.stem + ".pdf"))
-                imgs[0].save(pdfPath, "PDF", save_all=True, append_images=imgs[1:])
-                yield f"{pdfPath.name} - {len(imgs)} pages"
+        if output:
+            pdfPath = GenerateUniqueName(dirPath.parent / (dirPath.stem + ".pdf"))
+            output[0].save(pdfPath, "PDF", save_all=True, append_images=output[1:])
+            yield f"{pdfPath.name} - {len(output)} pages"
 
     elif len(files) == 1:
         file = files[0]

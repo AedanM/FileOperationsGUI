@@ -141,13 +141,13 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
 
         if newName != p.stem:
             dst = p.parent / str(newName + p.suffix)
-            if not dst.exists() and dst != p:
+            if dst.exists() and dst != p:
                 dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
             p.rename(dst)
             renamed += 1
-        updateRate: int = max(round(totalFiles / 10), 1)
+        updateRate: int = max(round(totalFiles / 3), 1) if totalFiles > 100 else totalFiles
         if (renamed % updateRate) == 0 and renamed > 0:
-            yield f"{renamed}/{totalFiles} Renamed"
+            yield f"Progress -> {renamed}/{totalFiles}"
 
     yield f"{renamed}/{totalFiles} Renamed"
 
