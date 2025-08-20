@@ -2,7 +2,6 @@
 
 import itertools
 from collections.abc import Generator
-from math import floor
 from pathlib import Path
 
 from cv2 import CAP_PROP_FPS, CAP_PROP_FRAME_COUNT, CAP_PROP_POS_FRAMES, VideoCapture, imwrite
@@ -135,83 +134,6 @@ def DecompileGIF(inputPath: Path, renderToSubDir: bool = False) -> Generator[str
         yield f"Rendered {imageObject.n_frames} frames to {parentDir}"  # type: ignore[reportAttributeAccessIssue]
     if not gifList:
         yield "No .gif files found"
-
-
-def SplitIMG(imagePath: Path, gridDim: list[int], makeSubDir: bool = False) -> Generator[str]:
-    """Split an image into sub images by a grid.
-
-    Parameters
-    ----------
-    imagePath : Path
-        input image or directory of images
-    gridDim : list
-        dimensions of grid
-    makeSubDir : bool, optional
-        should the output be grouped to a subdir, by default False
-
-    Yields
-    ------
-    Generator[str]
-        status string
-    """
-    imgs: list[Path] = list(imagePath.glob("*.*")) if imagePath.is_dir() else [imagePath]
-    for imgPath in imgs:
-        image: Image.Image = Image.open(imgPath)
-        if len(gridDim) == 1:
-            # Add 1-D handling
-            finalDim: list[int] = [1, *gridDim] if image.size[0] > image.size[1] else [*gridDim, 1]
-        else:
-            finalDim: list[int] = gridDim
-        image.close()
-        yield SplitGrid(imgPath, finalDim, makeSubDir)
-
-
-def SplitGrid(imagePath: Path, gridSize: list, createSubDir: bool) -> str:
-    """Split an image to grid dimensions.
-
-    Parameters
-    ----------
-    imagePath : Path
-        path to image
-    gridSize : list
-        grid dimensions [x,y]
-    subDir : bool
-        should a subdir be created
-
-    Returns
-    -------
-    str
-        status string
-    """
-    x: int = gridSize[0]
-    y: int = gridSize[1]
-    image: Image.Image = Image.open(imagePath)
-    width: int = image.size[0]
-    height: int = image.size[1]
-    successCount: int = 0
-    dstPath: Path = imagePath.parent if not createSubDir else imagePath.parent / imagePath.stem
-
-    if createSubDir and not dstPath.exists():
-        dstPath.mkdir(exist_ok=True)
-
-    for i in range(y):
-        row: int = i % y
-        top: int = floor(height * (row / y))
-        bottom: int = floor(height * ((row + 1) / y)) - 1
-        for j in range(x):
-            col: int = j % x
-            cropped: Image.Image = image.crop(
-                (
-                    floor(width * (col / x)),
-                    top,
-                    floor(width * ((col + 1) / x)) - 1,
-                    bottom,
-                ),
-            )
-            successCount += 1
-            cropped.save(dstPath / f"{imagePath.stem} {successCount:02d}.png")
-
-    return f"{successCount}/{x * y} Saved In {imagePath.name}"
 
 
 def Ranges(i: list[int]) -> Generator[tuple[int, int]]:
