@@ -35,7 +35,7 @@ class ImageWidget(BaseWidget):
         self.Layout.addWidget(inputFrame, 1, 0, 1, 7)
 
         self.BuildFixNamesFrame(2, 3)
-        self.BuildCheckSeqFrame(2, 6)
+        self.BuildTrimFrame(2, 6)
 
         self.BuildSortFolderFrame(4, 3)
         self.BuildFlattenFrame(4, 6)

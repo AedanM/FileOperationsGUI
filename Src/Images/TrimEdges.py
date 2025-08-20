@@ -1,94 +1,117 @@
+"""Doc to trim borders from images."""
+
 import sys
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
-CONFIG = {"COLOR": (0, 0, 0), "TOLERANCE": 0.02, "BUFFER": 5}
-
-
-def CheckRow(pixels, rangeVal, index, switch=False):
-    miss = 0
-    match = 0
-    for idx in range(rangeVal):
-        try:
-            sample = tuple(pixels[index, idx] if switch else pixels[idx, index])
-            if sample != tuple(CONFIG["COLOR"]) and sample != (0, 0, 0):
-                miss += 1
-            else:
-                match += 1
-
-        except Exception as e:
-            print(idx, index, e)
-            sys.exit(1)
-    return miss / (miss + match)
+CONFIG = {
+    "BORDER_COLOR": [255, 255, 255],
+    "TOLERANCE": 10,
+    "PADDING": 0,
+    "AUTO": True,
+}
 
 
-def TrimEdge(imgPath) -> int:
-    img = Image.open(imgPath).convert("RGB")
-    width, height = img.size
-    if width == 0 or height == 0:
-        return 0
-    pixels = img.load()
-    if pixels is None:
-        return 0
+def IsBorder(pixel: tuple) -> bool:
+    return all(abs(pixel[i] - CONFIG["BORDER_COLOR"][i]) <= CONFIG["TOLERANCE"] for i in range(3))
+
+
+def DetermineBoundary(
+    pixels: Any,
+    width: int,
+    height: int,
+) -> tuple[int, int, int, int]:
     top = 0
-    if CONFIG["COLOR"] is None:
-        CONFIG["COLOR"] = tuple(pixels[0, 0])  # type:ignore
-    while top < height:
-        if CheckRow(pixels, width, top) < CONFIG["TOLERANCE"]:
-            top += 1
-        else:
+    for y in range(height):
+        if any(not IsBorder(pixels[x, y]) for x in range(width)):
             break
+        top += 1
 
     bottom = height - 1
-    while bottom >= top:
-        if CheckRow(pixels, width, bottom) < CONFIG["TOLERANCE"]:
-            bottom -= 1
-        else:
+    for y in range(height - 1, -1, -1):
+        if any(not IsBorder(pixels[x, y]) for x in range(width)):
             break
+        bottom -= 1
 
-    if top > bottom:
-        left, right = 0, -1
-    else:
-        left = 0
-        while left < width:
-            if CheckRow(pixels, bottom + 1, left, True) < CONFIG["TOLERANCE"]:
-                left += 1
-            else:
-                break
+    left = 0
+    for x in range(width):
+        if any(not IsBorder(pixels[x, y]) for y in range(height)):
+            break
+        left += 1
 
-        right = width - 1
-        while right >= left:
-            if CheckRow(pixels, bottom + 1, right, True) < CONFIG["TOLERANCE"]:
-                right -= 1
-            else:
-                break
-    top = max(top - CONFIG["BUFFER"], 0)
-    left = max(left - CONFIG["BUFFER"], 0)
-    bottom = min(bottom + CONFIG["BUFFER"], height)
-    right = min(right + CONFIG["BUFFER"], width)
-    if top > bottom or left > right:
-        box = (0, 0, 0, 0)
-    else:
-        box = (left, top, right + 1, bottom + 1)
-    img = img.crop(box)
-    img.save(imgPath)
-    return 1
+    right = width - 1
+    for x in range(width - 1, -1, -1):
+        if any(not IsBorder(pixels[x, y]) for y in range(height)):
+            break
+        right -= 1
+    return top, bottom, left, right
 
 
-def TrimAllEdges(parent, keyColor: tuple | None = (255, 255, 255)) -> Generator[str]:
-    CONFIG["COLOR"] = keyColor
-    files = parent.glob("**/*.*") if parent.is_dir() else [parent]
-    successCount, fullCount = 0, 0
+def StripBorders(
+    image_path: Path,
+    border_color: None | str = None,
+    save_path: Path | None = None,
+) -> bool:
+    """Strip uneven borders from an image based on a given border color, with optional tolerance.
+
+    Args:
+        image_path (str): Path to the input image.
+        border_color (tuple): RGB tuple of the border to remove (e.g (255, 255, 255) for white)
+        save_path (str, optional): Path to save the processed image. If None, does not save.
+
+    Returns
+    -------
+        Image: Pillow Image object without the border.
+    """
+    img = Image.open(image_path).convert("RGB")
+    pixels = img.load()
+    if pixels is None:
+        raise UnidentifiedImageError(image_path)
+
+    if isinstance(border_color, str):
+        CONFIG["BORDER_COLOR"] = [int(x) for x in border_color.split(",")]
+        CONFIG["AUTO"] = False
+    if CONFIG["AUTO"]:
+        CONFIG["BORDER_COLOR"] = pixels[0, 0]
+
+    width, height = img.size
+
+    # Determine crop boundaries
+    top, bottom, left, right = DetermineBoundary(pixels, width, height)
+    # Crop the image
+    cropped = img.crop(
+        (
+            max(0, left - CONFIG["PADDING"]),
+            max(0, top - CONFIG["PADDING"]),
+            min(right + 1 + CONFIG["PADDING"], width),
+            min(bottom + 1 + CONFIG["PADDING"], height),
+        ),
+    )
+    if save_path and cropped.size != img.size:
+        print(f"Saved to {save_path.stem}")
+        cropped.save(save_path)
+        return True
+    return False
+
+
+def TrimAllEdges(path: Path, color: str | None = None) -> Generator[str]:
+    files = list(path.glob("*.*"))
+    failed = 0
     for file in files:
-        if file.is_file():
-            fullCount += 1
-            try:
-                successCount += TrimEdge(file)
-            except Exception as e:
-                print(f"{file} Failed with {e}")
-    yield f"{successCount}/{fullCount} Trimmed in Place"
+        try:
+            if not StripBorders(
+                image_path=file,
+                border_color=color,
+                save_path=file,
+            ):
+                failed += 1
+        except UnidentifiedImageError as e:
+            failed + 1
+            yield f"Error {e} -> {file}"
+    yield f"{len(files) - failed}/{len(files)} trimmed"
 
 
 if __name__ == "__main__":
