@@ -143,6 +143,7 @@ class BaseWidget(QWidget):
             self.worker = WorkerThread(connection)
             self.worker.resultReady.connect(displayResult)
             self.worker.start()
+            self.worker.setPriority(QThread.Priority.HighestPriority)
 
         runButton.clicked.connect(startWorker)
         masterLayout.addWidget(runButton)
