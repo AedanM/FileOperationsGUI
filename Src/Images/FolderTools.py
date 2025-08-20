@@ -98,7 +98,7 @@ def Simplify(inputPath: Path) -> Generator[str]:
     folderList: list[Path] = [x for x in inputPath.glob("*") if x.is_dir() and x.stem[0] != "_"]
     for dirPath in folderList:
         files: list[Path] = list(dirPath.glob("*.*"))
-        if AllEqualFiles(dirPath):
+        if files and AllEqualFiles(dirPath):
             masterFile: Path = files[0]
             dst: Path = dirPath.parent / f"{dirPath.name}{masterFile.suffix}"
             if dst.exists() and ComputeHash(masterFile) == ComputeHash(dst):
