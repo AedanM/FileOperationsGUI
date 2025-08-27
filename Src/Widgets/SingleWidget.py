@@ -1,10 +1,12 @@
 """Widget page for single operations."""
 
 from collections.abc import Generator
+from pathlib import Path
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QLineEdit, QTextEdit, QWidget
 
+from Src.Images.ImageSequences import CheckSeq
 from Src.Utilities.TranslateInPlace import TranslateV2
 from Src.Widgets.BaseWidget import BaseWidget
 
@@ -27,8 +29,20 @@ class SingleWidget(BaseWidget):
         self.Layout.addWidget(inputFrame, 1, 0, 1, 7)
 
         self.BuildTranslateFrame(4)
+        self.BuildCheckSeqFrame(6, 3)
 
     # region Constructors
+    def BuildCheckSeqFrame(self, columnIdx: int, rowIdx: int) -> None:
+        frame, layout = self.BuildBaseFrame(
+            title="Check Sequence",
+            caption="Check that a sequence of files is complete",
+        )
+
+        def RunAction() -> Generator[str]:
+            return CheckSeq(Path(self.ActiveField))
+
+        self.BuildRunButton(frame, layout, RunAction)
+        self.Layout.addWidget(frame, rowIdx, columnIdx, 3, 1)
 
     def BuildTranslateFrame(self, columnIdx: int) -> None:
         """Build frame for translating image.

@@ -33,7 +33,9 @@ def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[
             seqs.add(" ".join(file.stem.split(" ")[:-1]))
     for seq in seqs:
         folder = p / seq
-        sequenceFiles = [x for x in files if re.search(rf"{seq}\s?\d+", x.name)]
+        if seq == p.stem:
+            continue
+        sequenceFiles = [x for x in files if re.search(rf"^{seq}\s?[\d+]?", x.name)]
         if len(sequenceFiles) > minCount or folder.exists():
             folder.mkdir(parents=True, exist_ok=True)
             for file in sequenceFiles:

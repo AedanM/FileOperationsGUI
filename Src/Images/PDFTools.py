@@ -78,15 +78,14 @@ def CompileFolders(p: Path, quality: float) -> Generator[str]:
     for dirPath in [x for x in p.glob("*/") if x.stem[0] != "_"]:
         exts = GetFileExtensions(dirPath)
         if "/" in exts:
-            return GenerateMessage(f"ERROR -> subfolder found in {dirPath}")
+            yield from GenerateMessage(f"ERROR -> subfolder found in {dirPath}")
         elif exts == {"pdf"}:
-            return MergePDF(dirPath)
+            yield from MergePDF(dirPath)
         elif all(x in IMG_EXTS for x in exts):
-            return CompileImages(dirPath, quality)
+            yield from CompileImages(dirPath, quality)
         else:
-            return GenerateMessage(
+            yield from GenerateMessage(
                 "Incompatible files found "
                 f"({','.join([x for x in exts if x not in IMG_EXTS])})"
                 f" -> {dirPath.stem}",
             )
-    return GenerateMessage("No folders found")

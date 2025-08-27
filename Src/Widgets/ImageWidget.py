@@ -44,18 +44,6 @@ class ImageWidget(BaseWidget):
         self.BuildDecompileFrame(6, 6)
 
     # region Constructors
-    def BuildCheckSeqFrame(self, columnIdx: int, rowIdx: int) -> None:
-        frame, layout = self.BuildBaseFrame(
-            title="Check Sequence",
-            caption="Check that a sequence of files is complete",
-        )
-
-        def RunAction() -> Generator[str]:
-            return CheckSeq(Path(self.ActiveField))
-
-        self.BuildRunButton(frame, layout, RunAction)
-        self.Layout.addWidget(frame, rowIdx, columnIdx, 3, 1)
-
     def BuildSortFolderFrame(self, columnIdx: int, rowIdx: int) -> None:
         frame, layout = self.BuildBaseFrame(
             title="Sort To Folders",
@@ -157,11 +145,11 @@ class ImageWidget(BaseWidget):
         def RunAction() -> Generator[str]:
             match decompileOptions.currentText():
                 case "GIF":
-                    return DecompileGIF(Path(self.ActiveField), makeDir)
+                    return DecompileGIF(Path(self.ActiveField), makeDir.isChecked())
                 case "PDF":
-                    return DecompilePDF(Path(self.ActiveField), makeDir)
+                    return DecompilePDF(Path(self.ActiveField), makeDir.isChecked())
                 case "VIDEO":
-                    return DecompileVideo(Path(self.ActiveField), makeSubDir=makeDir)
+                    return DecompileVideo(Path(self.ActiveField), makeDir.isChecked())
                 case _others:
                     return [f"Invalid selection {self.DecompileOptions.currentText()}"]  # type: ignore[reportReturnType]
 
