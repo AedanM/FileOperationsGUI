@@ -60,8 +60,6 @@ ignore = [
     "N802",   # snake_case method names
     "S311",   # cryptography warning
     "RUF015", # next vs [0]
-    "D102",
-    "D103",
 ]
 line-length = 100
 fixable = ["D400"]

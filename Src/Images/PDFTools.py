@@ -15,7 +15,7 @@ from Src.Utilities.UtilityTools import IMG_EXTS, DeleteFolder, GenerateMessage, 
 
 
 def GetFileExtensions(path: Path) -> set[str]:
-    ext: set[str] = {x.suffix.replace(".", "") for x in path.glob("*.*")}
+    ext: set[str] = {x.suffix.replace(".", "").lower() for x in path.glob("*.*")}
     if list(path.glob("*/")):
         ext.add("/")
 

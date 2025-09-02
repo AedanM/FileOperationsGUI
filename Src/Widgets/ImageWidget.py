@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QComboBox, QDoubleSpinBox, QLabel, QLineEdit, QTextE
 
 from Src.Images.FixNames import FixNames
 from Src.Images.FolderTools import Flatten, SortToFolders
-from Src.Images.ImageSequences import CheckSeq, DecompileGIF, DecompilePDF, DecompileVideo
+from Src.Images.ImageSequences import DecompileGIF, DecompilePDF, DecompileVideo
 from Src.Images.PDFTools import CompileFolders
 from Src.Images.TrimEdges import TrimAllEdges
 from Src.Widgets.BaseWidget import BaseWidget
@@ -180,7 +180,7 @@ class ImageWidget(BaseWidget):
         def RunAction() -> Generator[str]:
             return TrimAllEdges(
                 Path(self.ActiveField),
-                trimColor.text().split(",") if trimColor.text() != "" else None,
+                trimColor.text() if trimColor.text() != "" else None,
             )
 
         self.BuildRunButton(frame, layout, RunAction)

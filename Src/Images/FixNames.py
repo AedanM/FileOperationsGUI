@@ -102,8 +102,14 @@ def RemoveBannedPhrases(name: str) -> str:
         r"\s(Pg\s?)\d",
         r"\s(Part\s?)\d",
         r"\s(Chapter\s?)\d",
+        r"\s(Comm\s?)",
+        r"\s(Commission\s?)",
         r"\s(Ch\s?)\d",
         r"\s(#\d?)\d",
+        r"(\s{2,})",
+        r" (\()",
+        r"(\)) ",
+        r"(\.+)",
     ]
     outName = name
 

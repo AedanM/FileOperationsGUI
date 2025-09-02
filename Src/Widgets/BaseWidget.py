@@ -41,7 +41,7 @@ class BaseWidget(QWidget):
 
     MainFolderInput: QLineEdit
     OutputText: QTextEdit
-    worker: WorkerThread
+    Worker: WorkerThread
 
     def __init__(self, parent: QWidget) -> None:
         QWidget.__init__(self, parent=parent)
@@ -138,14 +138,14 @@ class BaseWidget(QWidget):
         def displayResult(result: str) -> None:
             currentText = self.OutputText.toPlainText()
             self.OutputText.setText(f"{currentText}\n{result}")
-            if vsBar := self.OutputText.verticalScrollBar():
-                vsBar.setValue(vsBar.maximum())
+            if vBar := self.OutputText.verticalScrollBar():
+                vBar.setValue(vBar.maximum())
 
         def startWorker() -> None:
-            self.worker = WorkerThread(connection)
-            self.worker.resultReady.connect(displayResult)
-            self.worker.start()
-            self.worker.setPriority(QThread.Priority.HighestPriority)
+            self.Worker = WorkerThread(connection)
+            self.Worker.resultReady.connect(displayResult)
+            self.Worker.start()
+            self.Worker.setPriority(QThread.Priority.HighestPriority)
 
         runButton.clicked.connect(startWorker)
         masterLayout.addWidget(runButton)
