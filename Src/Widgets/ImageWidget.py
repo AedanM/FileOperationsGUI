@@ -151,7 +151,7 @@ class ImageWidget(BaseWidget):
                 case "VIDEO":
                     return DecompileVideo(Path(self.ActiveField), makeDir.isChecked())
                 case _others:
-                    return [f"Invalid selection {self.DecompileOptions.currentText()}"]  # type: ignore[reportReturnType]
+                    return [f"Invalid selection {self.DecompileOptions.currentText()}"]  # pyright: ignore[reportReturnType]
 
         self.BuildRunButton(frame, layout, RunAction)
 

@@ -47,7 +47,7 @@ def LoadEpisodes(topic: str, _isShow: bool) -> str:
                 },
             )
             df = df[["epNum", "Title"]]
-            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()]  # type: ignore[reportAttributeAccessIssue]
+            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()]  # pyright: ignore[reportAttributeAccessIssue]
             for _idx, row in df.iterrows():
                 epList.append(
                     f"S{season:02d}E{int(row['epNum']):02d},{row['Title'].replace('?', '')}",
