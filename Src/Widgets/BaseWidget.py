@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QRadioButton,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -39,6 +40,8 @@ class BaseWidget(QWidget):
     """Base widget for FileOpsGui."""
 
     MainFolderInput: QLineEdit
+    OutputText: QTextEdit
+    Worker: WorkerThread
 
     def __init__(self, parent: QWidget) -> None:
         QWidget.__init__(self, parent=parent)
@@ -75,7 +78,7 @@ class BaseWidget(QWidget):
     def SelectFile(self, lineEdit: QLineEdit) -> str:
         folder = QFileDialog.getOpenFileName(self, "Select File")
         lineEdit.setText(folder[0])
-        return folder
+        return folder[0]
 
     # region Constructors
 
@@ -135,15 +138,14 @@ class BaseWidget(QWidget):
         def displayResult(result: str) -> None:
             currentText = self.OutputText.toPlainText()
             self.OutputText.setText(f"{currentText}\n{result}")
-            self.OutputText.verticalScrollBar().setValue(
-                self.OutputText.verticalScrollBar().maximum(),
-            )
+            if vBar := self.OutputText.verticalScrollBar():
+                vBar.setValue(vBar.maximum())
 
         def startWorker() -> None:
-            self.worker = WorkerThread(connection)
-            self.worker.resultReady.connect(displayResult)
-            self.worker.start()
-            self.worker.setPriority(QThread.Priority.HighestPriority)
+            self.Worker = WorkerThread(connection)
+            self.Worker.resultReady.connect(displayResult)
+            self.Worker.start()
+            self.Worker.setPriority(QThread.Priority.HighestPriority)
 
         runButton.clicked.connect(startWorker)
         masterLayout.addWidget(runButton)
