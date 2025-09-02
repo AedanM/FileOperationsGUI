@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QRadioButton,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -39,6 +40,8 @@ class BaseWidget(QWidget):
     """Base widget for FileOpsGui."""
 
     MainFolderInput: QLineEdit
+    OutputText: QTextEdit
+    worker: WorkerThread
 
     def __init__(self, parent: QWidget) -> None:
         QWidget.__init__(self, parent=parent)
@@ -75,7 +78,7 @@ class BaseWidget(QWidget):
     def SelectFile(self, lineEdit: QLineEdit) -> str:
         folder = QFileDialog.getOpenFileName(self, "Select File")
         lineEdit.setText(folder[0])
-        return folder
+        return folder[0]
 
     # region Constructors
 
@@ -135,9 +138,8 @@ class BaseWidget(QWidget):
         def displayResult(result: str) -> None:
             currentText = self.OutputText.toPlainText()
             self.OutputText.setText(f"{currentText}\n{result}")
-            self.OutputText.verticalScrollBar().setValue(
-                self.OutputText.verticalScrollBar().maximum(),
-            )
+            if vsBar := self.OutputText.verticalScrollBar():
+                vsBar.setValue(vsBar.maximum())
 
         def startWorker() -> None:
             self.worker = WorkerThread(connection)

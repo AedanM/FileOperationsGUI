@@ -109,7 +109,7 @@ def TrimAllEdges(path: Path, color: str | None = None) -> Generator[str]:
             ):
                 failed += 1
         except UnidentifiedImageError as e:
-            failed + 1
+            failed + 1  # type: ignore[reportUnusedExpression]
             yield f"Error {e} -> {file}"
     yield f"{len(files) - failed}/{len(files)} trimmed"
 
