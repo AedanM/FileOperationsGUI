@@ -5,8 +5,8 @@ from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
-import cv2
 import pytesseract
+from cv2 import FONT_HERSHEY_DUPLEX, getTextSize, imread, imwrite, putText, rectangle
 from pytesseract import Output
 from translate import Translator
 
@@ -37,13 +37,13 @@ def BoxExtract(results: dict) -> list[dict]:
 
 def DrawFunc(image: Any, box: dict) -> Any:
     x, y, w, h = box["shape"]
-    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
+    rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
     imScale = CalcTextScale(box)
-    cv2.putText(
+    putText(
         image,
         box["text"],
         (x + 10, y + ((3 * h) // 4)),
-        cv2.FONT_HERSHEY_DUPLEX,
+        FONT_HERSHEY_DUPLEX,
         imScale,
         (255, 255, 255),
         2,
@@ -53,9 +53,9 @@ def DrawFunc(image: Any, box: dict) -> Any:
 
 def CalcTextScale(box: dict) -> float:
     _x, _y, w, _h = box["shape"]
-    textSize = cv2.getTextSize(
+    textSize = getTextSize(
         text=box["text"],
-        fontFace=cv2.FONT_HERSHEY_DUPLEX,
+        fontFace=FONT_HERSHEY_DUPLEX,
         fontScale=1,
         thickness=2,
     )
@@ -70,7 +70,7 @@ def TranslateV2(fromLang: str, path: str) -> Generator[str]:
         to_lang="en",
         email="aedan.mchale@gmail.com",
     )
-    image = cv2.imread(path)
+    image = imread(path)
     results = pytesseract.image_to_data(image, output_type=Output.DICT)
     masterList = []
     for box in BoxExtract(results):
@@ -80,7 +80,7 @@ def TranslateV2(fromLang: str, path: str) -> Generator[str]:
         b["text"] = translator.translate(b["text"])
         image = DrawFunc(image, b)
     p = Path(path)
-    cv2.imwrite(str(p.parent / f"{p.stem}-translated.png"), image)
+    imwrite(str(p.parent / f"{p.stem}-translated.png"), image)
     yield f"{p.stem}-translated.png Written"
 
 

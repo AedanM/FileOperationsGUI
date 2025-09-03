@@ -128,10 +128,10 @@ def DecompileGIF(inputPath: Path, renderToSubDir: bool = False) -> Generator[str
         imageObject: Image.Image = Image.open(path)
         parentDir: Path = path.parent / path.stem if renderToSubDir else path.parent
         parentDir.mkdir(exist_ok=True)
-        for frame in range(imageObject.n_frames):  # type: ignore[reportAttributeAccessIssue]
+        for frame in range(imageObject.n_frames):  # pyright: ignore[reportAttributeAccessIssue]
             imageObject.seek(frame)
             imageObject.save(parentDir / f"{path.stem} {frame:03d}.png")
-        yield f"Rendered {imageObject.n_frames} frames to {parentDir}"  # type: ignore[reportAttributeAccessIssue]
+        yield f"Rendered {imageObject.n_frames} frames to {parentDir}"  # pyright: ignore[reportAttributeAccessIssue]
     if not gifList:
         yield "No .gif files found"
 

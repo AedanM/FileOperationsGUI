@@ -3,8 +3,8 @@
 Install poppler -> conda install -c conda-forge poppler.
 """
 
-import contextlib
 from collections.abc import Generator
+from contextlib import suppress
 from pathlib import Path
 from statistics import mode
 
@@ -35,7 +35,7 @@ def MergePDF(folderPath: Path) -> Generator[str]:
 def GetPageHeight(imgs: list[Image.Image]) -> int:
     heights = []
     for img in imgs:
-        with contextlib.suppress(ValueError):
+        with suppress(ValueError):
             heights.append(img.size[1])
     return int(round(min(mode(heights), 2160), 0))
 

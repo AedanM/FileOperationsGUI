@@ -4,6 +4,7 @@ dependencies = [
     "PyQt6",
     "PyQt6_sip",
     "cryptography>=3.1",
+    "cx_Freeze",
     "html5lib",
     "numpy",
     "opencv_python",
@@ -62,10 +63,17 @@ ignore = [
     "RUF015", # next vs [0]
 ]
 line-length = 100
-fixable = ["D400"]
+extend-exclude = ["dist"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.ruff.lint.pep8-naming]
 ignore-names = ["*"]
+
+[tool.cxfreeze]
+executables = [{ script = "run.py", target_name = "filegui" }]
+
+[tool.cxfreeze.build_exe]
+build_exe = "dist"
+optimize = 2
