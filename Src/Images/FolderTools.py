@@ -32,6 +32,7 @@ def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[
         if file.stem.strip()[-1].isnumeric():
             seqs.add(" ".join(file.stem.split(" ")[:-1]))
     for seq in seqs:
+        files: list[Path] = list(p.glob("*.*"))
         folder = p / seq
         if seq == p.stem:
             continue
