@@ -1,8 +1,8 @@
 """Utility tools for file gui."""
 
-import hashlib
 from collections.abc import Callable, Generator
 from functools import wraps
+from hashlib import new as newHash
 from pathlib import Path
 from time import time
 from typing import Any
@@ -24,7 +24,7 @@ def DeleteFolder(path: Path) -> bool:
 
 
 def ComputeHash(path: Path) -> bytes:
-    h = hashlib.new("sha256")
+    h = newHash("sha256")
     with path.open("rb") as f:
         while chunk := f.read(8196):
             h.update(chunk)

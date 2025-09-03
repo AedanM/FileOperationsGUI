@@ -3,9 +3,9 @@
 from io import StringIO
 from pathlib import Path
 
-import pandas as pd
 import requests
-import wikipedia as wp
+from pandas import read_html, to_numeric
+from wikipedia import exceptions, page
 
 from Src.Utilities.UtilityTools import MakeStringSystemSafe
 
@@ -15,8 +15,8 @@ UA = {"User-Agent": "Aedan McHale (aedan.mchale@gmail.com)"}
 
 def GetHTML(topic: str) -> str:
     try:
-        html = wp.page(topic).html()
-    except wp.exceptions.PageError:
+        html = page(topic).html()
+    except exceptions.PageError:
         r = requests.get(
             f"http://en.wikipedia.org/w/api.php?action=parse&prop=text&page={topic}&format=json",
             timeout=1000,
@@ -31,7 +31,7 @@ def LoadEpisodes(topic: str, _isShow: bool) -> str:
 
     season = 1
     epList = []
-    for df in pd.read_html(StringIO(html)):
+    for df in read_html(StringIO(html)):
         keyList = "".join([str(x) for x in list(df.keys())])
         if "Title" in keyList and "No." in keyList:
             badTitle = [str(x) for x in df if "Title" in str(x)][0]
@@ -47,7 +47,7 @@ def LoadEpisodes(topic: str, _isShow: bool) -> str:
                 },
             )
             df = df[["epNum", "Title"]]
-            df = df[pd.to_numeric(df["epNum"], errors="coerce").notna()]  # pyright: ignore[reportAttributeAccessIssue]
+            df = df[to_numeric(df["epNum"], errors="coerce").notna()]  # pyright: ignore[reportAttributeAccessIssue]
             for _idx, row in df.iterrows():
                 epList.append(
                     f"S{season:02d}E{int(row['epNum']):02d},{row['Title'].replace('?', '')}",
