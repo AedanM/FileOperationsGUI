@@ -11,6 +11,7 @@ from Src.Images.FolderTools import Flatten, SortToFolders
 from Src.Images.ImageSequences import DecompileGIF, DecompilePDF, DecompileVideo
 from Src.Images.PDFTools import CompileFolders
 from Src.Images.TrimEdges import TrimAllEdges
+from Src.Utilities.UtilityTools import GenerateMessage
 from Src.Widgets.BaseWidget import BaseWidget
 
 
@@ -151,7 +152,9 @@ class ImageWidget(BaseWidget):
                 case "VIDEO":
                     return DecompileVideo(Path(self.ActiveField), makeDir.isChecked())
                 case _others:
-                    return [f"Invalid selection {self.DecompileOptions.currentText()}"]  # pyright: ignore[reportReturnType]
+                    return GenerateMessage(
+                        f"Invalid selection {decompileOptions.currentText()}",
+                    )
 
         self.BuildRunButton(frame, layout, RunAction)
 

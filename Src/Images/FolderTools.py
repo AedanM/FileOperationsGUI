@@ -31,16 +31,19 @@ def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[
     for file in files:
         if file.stem.strip()[-1].isnumeric():
             seqs.add(" ".join(file.stem.split(" ")[:-1]))
+    seqs = set(list(seqs) + [x.name for x in p.glob("*/")])
     for seq in seqs:
+        files: list[Path] = list(p.glob("*.*"))
         folder = p / seq
         if seq == p.stem:
             continue
-        sequenceFiles = [x for x in files if re.search(rf"^{seq}\s?[\d+]?", x.name)]
+        sequenceFiles = [x for x in files if re.search(rf"^{re.escape(seq)}\s?[\d+]?", x.name)]
         if len(sequenceFiles) > minCount or folder.exists():
             folder.mkdir(parents=True, exist_ok=True)
             for file in sequenceFiles:
                 file.replace(folder / file.name)
-            yield f"{seq} -> {len(sequenceFiles)} Files"
+            if sequenceFiles:
+                yield f"{seq} -> {len(sequenceFiles)} Files"
 
 
 def Flatten(
@@ -115,3 +118,4 @@ def Simplify(inputPath: Path) -> Generator[str]:
                 raise FileExistsError(masterFile, dst)
             if not DeleteFolder(dirPath):
                 yield (f"Could not delete -> {dirPath}")
+    yield "Simplify Complete"

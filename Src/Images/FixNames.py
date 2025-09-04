@@ -98,18 +98,20 @@ def RemoveBannedPhrases(name: str) -> str:
         formatted name
     """
     banned: list[str] = [
-        r"\s(P\s?)\d",
-        r"\s(Pg\s?)\d",
-        r"\s(Part\s?)\d",
-        r"\s(Chapter\s?)\d",
-        r"\s(Comm\s?)",
-        r"\s(Commission\s?)",
-        r"\s(Ch\s?)\d",
+        r"\s(P)\s?\d*$",
+        r"\s(Pg)\s?\d*$",
+        r"\s(Part)\s?\d*$",
+        r"\s(Pt)\s?\d*$",
+        r"\s(Chapter)\s?\d*$",
+        r"\s(Commission)\s?",
+        r"\s(Tgtf)\s?",
+        r"\s(Comm)\s?",
+        r"\s(Ch)\s?\d",
         r"\s(#\d?)\d",
         r"(\s{2,})",
         r" (\()",
-        r"(\)) ",
-        r"(\.+)",
+        r"(\))\s?",
+        rf"(\.{2, 50})",
     ]
     outName = name
 
@@ -139,11 +141,11 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
     for p in path.glob(globFilter):
         newName = FixSpaceSubs(p.stem.strip())
         newName = CamelToSentence(newName)
-        newName = PadFinalNum(newName)
         newName = newName.strip().title()
         newName = FixContractions(newName)
         newName = RemoveBannedPhrases(newName)
         newName = re.sub(r"\s+", " ", newName)
+        newName = PadFinalNum(newName)
         if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
             newName = "_" + newName
 
