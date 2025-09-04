@@ -10,8 +10,6 @@ from cv2 import FONT_HERSHEY_DUPLEX, getTextSize, imread, imwrite, putText, rect
 from pytesseract import Output
 from translate import Translator
 
-# pylint:disable=E1101
-
 
 def BoxExtract(results: dict) -> list[dict]:
     boxList = []
