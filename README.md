@@ -1,6 +1,6 @@
 # File Operations Tool
 
-Tool written using PyQt6 for simplifying repeated file operations when I was formatting files for my media server.
+Tool written using PyQt6 for simplifying repeated file operations when I was formatting files. Made hyper-specialized for my needs, but if someone else gets use out of it, then groovy.
 
 ## Features
 
@@ -17,31 +17,28 @@ Features for fixing TV Show or Movie files
 
 ### Image Folder Manipulations
 
-![Media Tab](Attachments/ImageTab.png)
+![Image Tab](Attachments/ImageTab.png)
 
 Features designed for sequences of mixed photos or files
 
 - Fix non-standard naming conventions (rules fixed to my personal preference)
 - Sort Files to Folders based on file name (File 1.txt,File 2.txt... -> /File)
-- Compile subfolders of images into PDF format (designed for comics or image sequences)
-- Check file sequences, i.e. File_1.txt -> File_100.txt and checks if all sequential files are present
-- Flatten a series of subdirectories into a master directory
-- Merge PDFs in folders into master pdfs for each folder
+- Compile subfolders of images or pdfs into master PDFs (designed for comics or image sequences)
+- Trim borders from images
+- Decompile PDF/GIF/Video files into image sequences
 
 ### Single Image Operations
 
-![Media Tab](Attachments/SingleTab.png)
+![Image Tab](Attachments/SingleTab.png)
 
-Features to transform a single image or file
+Features to transform or create a single image or file
 
-- Split an image into grid components
 - Translate an image to English
-- Trim the borders of an image away
-- Decomplile a PDF to image sequence
- 
+- Check file sequences, i.e. File_1.txt -> File_100.txt and checks if all sequential files are present
+
 ## Run
 
-Written using [Uv Package Manger](https://github.com/astral-sh/uv)
+Written using [uv Package Manger](https://github.com/astral-sh/uv)
 
 ```powershell
 uv run .\run.py
