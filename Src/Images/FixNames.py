@@ -100,7 +100,8 @@ def RemoveBannedPhrases(name: str) -> str:
     banned: list[str] = [
         r"\s(P)\s?\d*$",
         r"\s(Pg)\s?\d*$",
-        r"\s(Part)\s?\d*$",
+        r"\s(Part)\s\d*$",
+        r"\s(Part)$",
         r"\s(Pt)\s?\d*$",
         r"\s(Chapter)\s?\d*$",
         r"\s(Commission)\s?",
@@ -145,7 +146,7 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
         newName = FixContractions(newName)
         newName = RemoveBannedPhrases(newName)
         newName = re.sub(r"\s+", " ", newName)
-        newName = PadFinalNum(newName)
+        newName = PadFinalNum(newName).strip()
         if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
             newName = "_" + newName
 

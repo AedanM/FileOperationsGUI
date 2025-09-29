@@ -115,7 +115,7 @@ def Simplify(inputPath: Path) -> Generator[str]:
                     dirPath.parent / f"{dirPath.name}{masterFile.suffix}",
                 )
                 masterFile.rename(dst)
-                raise FileExistsError(masterFile, dst)
+                # raise FileExistsError(masterFile, dst)
             if not DeleteFolder(dirPath):
                 yield (f"Could not delete -> {dirPath}")
     yield "Simplify Complete"
