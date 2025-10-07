@@ -1,5 +1,6 @@
 """Module to flatten and simplify directories."""
 
+import contextlib
 import re
 import shutil
 from collections.abc import Generator
@@ -41,7 +42,8 @@ def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[
         if len(sequenceFiles) > minCount or folder.exists():
             folder.mkdir(parents=True, exist_ok=True)
             for file in sequenceFiles:
-                file.replace(folder / file.name)
+                with contextlib.suppress(OSError):
+                    file.replace(folder / file.name)
             if sequenceFiles:
                 yield f"{seq} -> {len(sequenceFiles)} Files"
 
@@ -73,6 +75,8 @@ def Flatten(
     for folder in p.glob(globPattern):
         if folder.parent != p:
             dst: Path = p / f"{folder.parent.stem + ' ' if rename else ''}{folder.name}"
+            while dst.exists():
+                dst = dst.parent / f"{dst.stem} (1){dst.suffix}"
             if delete:
                 folder.rename(dst)
             else:

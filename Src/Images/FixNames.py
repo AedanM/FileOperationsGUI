@@ -1,5 +1,6 @@
 """Module to apply naming rules."""
 
+import contextlib
 import re
 import sys
 from collections.abc import Generator
@@ -154,8 +155,9 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
             dst = p.parent / str(newName + p.suffix)
             if dst.exists() and dst != p:
                 dst = GenerateUniqueName(p.parent / str(newName + p.suffix))
-            p.rename(dst)
-            renamed += 1
+            with contextlib.suppress(OSError):
+                p.rename(dst)
+                renamed += 1
         updateRate: int = max(round(totalFiles / 3), 1) if totalFiles > 100 else totalFiles
         if (renamed % updateRate) == 0 and renamed > 0:
             yield f"Progress -> {renamed}/{totalFiles}"
