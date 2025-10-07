@@ -47,7 +47,7 @@ def TimeUtility(repetitions: int = 10000, returnResults: bool = False) -> Callab
                     print(f"{iteration}/{repetitions} - {iteration / repetitions * 100}%")
                 return results if returnResults else None
             print(
-                f"Method {func.__name__} took {totalTime:0.3f}s over {repetitions} reps"  # type:ignore[unresolvedAttribute]
+                f"Method {func.__name__} took {totalTime:0.3f}s over {repetitions} reps"  # pyright: ignore[unresolvedAttribute]
                 f" with an average time of {(totalTime / repetitions) * 1000:2.4f} ms",
             )
 
