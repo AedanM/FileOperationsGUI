@@ -6,7 +6,6 @@ Install poppler -> conda install -c conda-forge poppler.
 from collections.abc import Generator
 from contextlib import suppress
 from pathlib import Path
-from statistics import mode
 
 from PIL import Image, UnidentifiedImageError
 from pypdf import PdfWriter
@@ -37,7 +36,7 @@ def GetPageHeight(imgs: list[Image.Image]) -> int:
     for img in imgs:
         with suppress(ValueError):
             heights.append(img.size[1])
-    return int(round(min(mode(heights), 2160), 0))
+    return int(round(min(max(heights), 2160), 0))
 
 
 def CompileImages(dirPath: Path, quality: float) -> Generator[str]:
@@ -58,6 +57,9 @@ def CompileImages(dirPath: Path, quality: float) -> Generator[str]:
                 if im.size[1] != height:
                     newWidth: int = round(im.size[0] * (height / im.size[1]))
                     im = im.resize((newWidth, height))
+                if im.size[0] > height * (1800 / 900):
+                    newHeight: int = round(im.size[1] * ((height * (1800 / 900)) / im.size[0]))
+                    im = im.resize((round(height * (1800 / 900)), newHeight))
                 output.append(im)
 
         if output:
