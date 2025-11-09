@@ -148,6 +148,8 @@ def FixNames(path: Path, globFilter: str = "*.*") -> Generator[str]:
         newName = RemoveBannedPhrases(newName)
         newName = re.sub(r"\s+", " ", newName)
         newName = PadFinalNum(newName).strip()
+        if not newName:
+            newName = p.stem
         if p.stem[0] == "_" and newName[0] != "_" and p.is_dir():
             newName = "_" + newName
 
