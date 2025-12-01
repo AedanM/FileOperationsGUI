@@ -2,7 +2,6 @@
 dependencies = [
     "Pillow",
     "PyQt6",
-    "PyQt6_sip",
     "cryptography>=3.1",
     "cx_Freeze",
     "html5lib",
@@ -14,6 +13,7 @@ dependencies = [
     "pytesseract",
     "translate",
     "wikipedia",
+    "tendo",
 ]
 name = "fileopsgui"
 version = "0.1.0"

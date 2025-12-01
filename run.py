@@ -1,8 +1,11 @@
 import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStyleFactory, QTabWidget
+from tendo import singleton
 
 from Src.Widgets import ImageWidget, MediaWidget, SingleWidget
+
+INSTANCE = singleton.SingleInstance()
 
 
 class MainWindow(QMainWindow):
