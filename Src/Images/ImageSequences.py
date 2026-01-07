@@ -1,6 +1,8 @@
 """Decomposing files into composite parts."""
 
 import itertools
+import os
+import subprocess
 from collections.abc import Generator
 from pathlib import Path
 
@@ -82,29 +84,36 @@ def DecompilePDF(inputPath: Path, makeSubdir: bool) -> Generator[str]:
     Generator[str]
         status string
     """
-    pdfList: list[Path] = list(inputPath.glob("*.pdf")) if inputPath.is_dir() else [inputPath]
-
-    for pdf in pdfList:
-        if makeSubdir:
-            dst = Path(str(pdf).replace(".pdf", ""))
-            if dst.exists():
-                dst = dst.parent / (dst.name + " PDF")
-                dst.mkdir(exist_ok=True)
-            else:
-                dst.mkdir()
-        else:
-            dst = pdf.parent
-
-        _pages = convert_from_path(
-            pdf_path=pdf,
-            fmt="png",
-            output_file=f"{dst.name.replace(' PDF', '')} ",
-            output_folder=dst,
+    if inputPath.is_dir():
+        os.chdir(inputPath)
+        subprocess.run(
+            ["pwsh.exe", "C:\\Users\\aedan\\PersonalScripts\\Scripts\\Powershell\\PDF2Image.ps1"],
         )
+        yield "Converted all PDFs in directory"
+    else:
+        pdfList: list[Path] = list(inputPath.glob("*.pdf")) if inputPath.is_dir() else [inputPath]
 
-        yield f"{dst.parent.name}\\{dst.name}"
-    if not pdfList:
-        yield "No .pdf files found"
+        for pdf in pdfList:
+            if makeSubdir:
+                dst = Path(str(pdf).replace(".pdf", ""))
+                if dst.exists():
+                    dst = dst.parent / (dst.name + " PDF")
+                    dst.mkdir(exist_ok=True)
+                else:
+                    dst.mkdir()
+            else:
+                dst = pdf.parent
+
+            _pages = convert_from_path(
+                pdf_path=pdf,
+                fmt="png",
+                output_file=f"{dst.name.replace(' PDF', '')} ",
+                output_folder=dst,
+            )
+
+            yield f"{dst.parent.name}\\{dst.name}"
+        if not pdfList:
+            yield "No .pdf files found"
 
 
 def DecompileGIF(inputPath: Path, renderToSubDir: bool = False) -> Generator[str]:

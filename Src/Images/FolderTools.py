@@ -31,14 +31,17 @@ def SortToFolders(p: Path, simplifyFirst: bool, minCount: int = 1) -> Generator[
     seqs: set[str] = set()
     for file in files:
         if file.stem.strip()[-1].isnumeric():
-            seqs.add(" ".join(file.stem.split(" ")[:-1]))
+            if matchStr := re.search(r"(\s?\d*)+$", file.stem):
+                seqs.add(file.stem[: matchStr.start()].strip())
     seqs = set(list(seqs) + [x.name for x in p.glob("*/")])
     for seq in seqs:
+        if not seq:
+            continue
         files: list[Path] = list(p.glob("*.*"))
         folder = p / seq
         if seq == p.stem:
             continue
-        sequenceFiles = [x for x in files if re.search(rf"^{re.escape(seq)}\s?[\d+]?", x.name)]
+        sequenceFiles = [x for x in files if re.search(rf"^{re.escape(seq)}[\d ]*$", x.stem)]
         if len(sequenceFiles) > minCount or folder.exists():
             folder.mkdir(parents=True, exist_ok=True)
             for file in sequenceFiles:
@@ -105,6 +108,7 @@ def AllEqualFiles(folder: Path) -> bool:
 def Simplify(inputPath: Path) -> Generator[str]:
     """Reduce folder structure in directory."""
     folderList: list[Path] = [x for x in inputPath.glob("*") if x.is_dir() and x.stem[0] != "_"]
+    renames = 0
     for dirPath in folderList:
         files: list[Path] = list(dirPath.glob("*.*"))
         if files and AllEqualFiles(dirPath):
@@ -114,12 +118,20 @@ def Simplify(inputPath: Path) -> Generator[str]:
                 pass
             elif not dst.exists():
                 masterFile.rename(dst)
+                renames += 1
             else:
                 dst: Path = GenerateUniqueName(
                     dirPath.parent / f"{dirPath.name}{masterFile.suffix}",
                 )
                 masterFile.rename(dst)
-                # raise FileExistsError(masterFile, dst)
+                renames += 1
             if not DeleteFolder(dirPath):
                 yield (f"Could not delete -> {dirPath}")
+    yield f"{renames} Files Renamed To Parent"
+    empties = 0
+    for folder in [x for x in inputPath.glob("**/") if x.is_dir() and x.stem[0] != "_"]:
+        if len(list(folder.glob("*"))) == 0:
+            folder.rmdir()
+            empties += 1
+    yield f"{empties} Empty Folders Removed"
     yield "Simplify Complete"

@@ -51,6 +51,7 @@ class ImageWidget(BaseWidget):
             caption="Sort Img sequences to Folders",
         )
         simplify = self.AddButtonFrame(frame, layout, "Simplify First")
+        simplify.setChecked(True)
 
         def RunAction() -> Generator[str]:
             return SortToFolders(Path(self.ActiveField), simplify.isChecked())
@@ -109,6 +110,7 @@ class ImageWidget(BaseWidget):
         )
 
         globFilter = QLineEdit(frame)
+        globFilter.setText("**/*")
         globFilter.setPlaceholderText("Glob Pattern")
         layout.addWidget(globFilter)
 

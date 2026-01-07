@@ -80,8 +80,10 @@ def FixContractions(name: str) -> str:
         formatted string
     """
     outStr: str = name
-    for match in re.finditer(r"'[A-Z]{1}", outStr):
-        outStr = outStr.replace(match.group(), match.group().lower())
+    for match in re.finditer(r"[’']([A-Z]{1})", outStr):
+        outStr = outStr.replace(match.group(0), f"'{match.group(1).lower()}")
+    for match in re.finditer(r" [DST]{1} ", outStr):
+        outStr = outStr.replace(match.group(), f"'{match.group().lower()} ")
     return outStr
 
 
@@ -100,7 +102,7 @@ def RemoveBannedPhrases(name: str) -> str:
     """
     banned: list[str] = [
         r"\s(P)\s?\d*$",
-        r"\s(Pg)\s?\d*$",
+        r"\s([Pp]g)\s?\d*$",
         r"\s(Part)\s\d*$",
         r"\s(Part)$",
         r"\s(Pt)\s?\d*$",
@@ -108,6 +110,8 @@ def RemoveBannedPhrases(name: str) -> str:
         r"\s(Commission)\s?",
         r"\s(Tgtf)\s?",
         r"\s(Comm)\s?",
+        r"\s?(Cmsn)\s",
+        r"\s(Cmsn)\s?",
         r"\s(Ch)\s?\d",
         r"\s(#\d?)\d",
         r"(\s{2,})",
